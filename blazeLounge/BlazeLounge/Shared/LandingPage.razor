@@ -1,0 +1,24 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page">
+    <div class="bckg">
+        <div id="topSquares" class="squareLine">
+            <div class="rectangle dark" style="transform: translate(0rem, -1rem);"></div>
+            <div class="rectangle dark" style="transform: translate(0rem, -3rem);"></div>
+            <div class="rectangle dark" style="transform: translate(0rem, -1rem);"></div>
+            <div class="rectangle dark"></div>
+        </div>
+        <div id="bottomSquares" class="squareLine">
+            <div class="rectangle dark" style="transform: translate(0rem, 0rem);"></div>
+            <div class="rectangle dark" style="transform: translate(0rem, 4rem);"></div>
+            <div class="rectangle dark" style="transform: translate(0rem, 6rem);"></div>
+            <div class="rectangle dark" style="transform: translate(0rem, 1rem);"></div>
+        </div>
+    </div>
+
+    <main>
+        <article class="content">
+            @Body
+        </article>
+    </main>
+</div>

@@ -1,0 +1,76 @@
+﻿@page "/login"
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http.Json;
+@using BlazeLounge.Data.Models;
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ILocalStorageService LocalStorage
+
+<div class="panel">
+    <h1 id="title">Log in</h1>
+
+    <EditForm Model="@LoginForm" OnValidSubmit="@HandleValidSubmit">
+        <div class="form-group">
+            @*<label for="username">Username:</label>*@
+            <InputText placeholder="Username" id="username" class="form-control" @bind-Value="@LoginForm.Username" />
+        </div>
+        <div class="form-group">
+            @*<label for="password">Password:</label>*@
+            <InputText placeholder ="Password" id="password" class="form-control" type="password" @bind-Value="@LoginForm.Password" />
+        </div>
+        <div id="buttons">
+            <button type="submit" class="btn btn-primary">Login</button>
+            <button @onclick="OnCancelPressed" class="btn btn-outline-primary">Cancel</button>
+        </div>
+
+    </EditForm>
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <p id="errorMessage">@ErrorMessage</p>
+    }
+</div>
+
+
+@code {
+    [Parameter]
+    public EventCallback<bool> CancelEventCallback { get; set; }
+
+    private RegisterModel LoginForm { get; set; } = new RegisterModel();
+
+    private string ErrorMessage { get; set; }
+
+    private async Task HandleValidSubmit()
+    {
+
+        try
+        {
+            var response = await HttpClient.PostAsJsonAsync<RegisterModel>("http://localhost:5122/api/blaze-lounge-user/login", LoginForm);
+            if (response.IsSuccessStatusCode)
+            {
+                var token = await response.Content.ReadAsStringAsync();
+
+                await LocalStorage.SetItemAsync("token", token);
+                await AuthStateProvider.GetAuthenticationStateAsync();
+
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                ErrorMessage = "Failed to login user.";
+            }
+        }
+        catch (Exception ex)
+
+        {
+            ErrorMessage = "An error occurred while logging in user: " + ex.Message;
+        }
+    }
+
+    private void OnCancelPressed()
+    {
+        CancelEventCallback.InvokeAsync();
+    }
+
+}
+

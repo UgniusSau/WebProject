@@ -1,0 +1,18 @@
+﻿@page "/"
+@inject NavigationManager NavigationManager
+@attribute [Authorize]
+
+<PageTitle>Index</PageTitle>
+
+<h1>Welcome to Blazelounge!</h1>
+<AuthorizeView>
+    <Authorized>
+        <p>Hello, @context.User.Identity.Name</p>
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/landing");
+        }
+    </NotAuthorized>
+
+</AuthorizeView>

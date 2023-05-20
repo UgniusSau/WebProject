@@ -1,0 +1,69 @@
+﻿@page "/landing"
+@layout LandingPage
+
+<div id="logoSection">
+    <div id="bigLogo">
+        <svg width="13rem" height="100%" viewBox="0 0 267 272" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M89.381 55.4313C89.381 55.4313 83.9023 56.237 85.5137 72.1896C87.125 88.1422 69.3999 126.493 50.7079 150.18C32.016 173.867 -17.2922 231.474 6.23393 265.555C6.23393 265.555 25.2482 243.076 34.5942 235.905C43.9401 228.735 64.888 211.493 70.689 200.455C70.689 200.455 72.9449 203.114 72.6226 210.768C72.6226 210.768 86.8028 216.327 106.139 165.649C106.139 165.649 112.907 170.886 104.85 208.834C104.85 208.834 132.888 190.545 133.21 145.668C133.21 145.668 130.632 113.199 144.168 101.839C144.168 101.839 156.092 167.019 158.992 172.739C161.893 178.46 159.637 184.341 159.637 184.341C159.637 184.341 174.139 148.005 178.973 151.469C178.973 151.469 169.305 212.46 214.424 225.592C214.424 225.592 221.192 229.863 214.424 212.057C210.394 201.116 209.721 189.221 212.49 177.896C212.49 177.896 212.732 201.502 238.272 223.659C263.812 245.815 257.609 272 257.609 272C257.609 272 281.699 225.351 248.585 189.498C215.471 153.645 229.168 93.218 236.983 80.5687C236.983 80.5687 226.59 78.0711 215.068 97.9716C203.547 117.872 187.917 151.872 182.196 88.9479C176.476 26.0237 176.637 22.3175 137.078 0C137.078 0 155.045 29.7299 134.499 68.9668C113.954 108.204 107.428 107.64 107.428 107.64C107.428 107.64 106.462 71.545 89.381 55.4313Z" fill="#ED2244" />
+        </svg>
+    </div>
+    <div id="logoText">
+        <a>Blazelounge</a>
+    </div>
+</div>
+<div id="buttons">
+    <button class="btn btn-primary" @onclick="OnClickSignUp">Sign up</button>
+    <button class="btn btn-outline-primary" @onclick="OnClickLogin">Log in</button>
+</div>
+
+@if (displayRegistrationForm)
+{
+    <div id="screenCover"></div>
+    <div id="registrationWrapper">
+        <Register CancelEventCallback="RegistrationCancelPressed"></Register>
+    </div>
+}
+
+@if (displayLoginForm)
+{
+    <div id="screenCover"></div>
+    <div id="loginWrapper">
+        <Login CancelEventCallback="LoginCancelPressed"></Login>
+    </div>
+}
+
+
+@code {
+         /*
+         * TODO:
+         * Register page
+         * Pick out font for buttons
+         * fix background box layouts
+         * add responsiveness (?)
+        */
+
+    bool displayRegistrationForm = false;
+    bool displayLoginForm = false;
+
+    public void OnClickSignUp()
+    {
+        displayRegistrationForm = true;
+        displayLoginForm = false;
+    }
+
+    public void OnClickLogin()
+    {
+        displayLoginForm = true;
+        displayRegistrationForm = false;
+    }
+
+    protected void RegistrationCancelPressed()
+    {
+        displayRegistrationForm = false;
+    }
+
+    protected void LoginCancelPressed()
+    {
+        displayLoginForm = false;
+    }
+}

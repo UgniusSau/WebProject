@@ -1,0 +1,60 @@
+﻿@page "/users"
+@using BlazeLounge.Data.Models;
+@using System.Net.Http.Json;
+@inject HttpClient HttpClient
+
+<PageTitle>users</PageTitle>
+<h3>Users</h3>
+
+
+@code {
+    private async Task<List<User>> GetUsersDB()
+    {
+        var response = await HttpClient.GetAsync("http://localhost:5122/api/blaze-lounge-users-db");
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadFromJsonAsync<List<User>>();
+            return result;
+        }
+        else
+        {
+            throw new Exception("Failed to fetch users.");
+        }
+    }
+
+    private List<User> users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await GetUsersDB();
+    }
+}
+
+@if (users != null)
+{
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.Username</td>
+                    <td>@user.Uuid</td>
+                    <td>@user.FirstName</td>
+                    <td>@user.LastName</td>
+                    <td>@user.Email</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Loading...</p>
+}

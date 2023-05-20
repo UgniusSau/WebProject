@@ -1,0 +1,119 @@
+﻿@page "/buyItem/{IdItem}"
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http.Json;
+@using BlazeLounge.Data.Models;
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ILocalStorageService LocalStorage
+@attribute [Authorize]
+
+
+<div class="panel">
+
+    <AuthorizeView>
+        <Authorized>
+            @if (item != null)
+            {
+                <h3>Confirm purchase</h3>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>Name: </td>
+                            <td>@item.Name</td>
+                        </tr>
+                        <tr>
+                            <td>Price: </td>
+                            <td>@item.Price</td>
+                        </tr>
+                        <tr>
+                            <td>Description: </td>
+                            <td>@item.Description</td>
+                        </tr>
+                 </tbody>
+                </table>
+
+                <div id="buttons">
+                    <button @onclick="OnBuyPressed" class="btn btn-outline-primary">Buy</button>
+                    <button @onclick="OnCancelPressed" class="btn btn-outline-primary">Cancel</button>
+                </div>
+            }
+            else
+            {
+                <h3>Loading..</h3>
+            }
+            
+        </Authorized>
+        <NotAuthorized>
+            @{
+                NavigationManager.NavigateTo("/landing");
+            }
+        </NotAuthorized>
+    </AuthorizeView>
+   
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <p id="errorMessage">@ErrorMessage</p>
+    }
+</div>
+
+
+@code {
+
+    [Parameter]
+    public string IdItem { get; set; }
+
+    private UniversalGameModel GameForm { get; set; } = new UniversalGameModel();
+
+    private string ErrorMessage { get; set; }
+
+    private Item? item;
+
+    protected override async Task OnInitializedAsync()
+    {
+        item = await HttpClient.GetFromJsonAsync<Item>($"http://localhost:5122/api/blaze-lounge/shop/item/{IdItem}");
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var loggedInUser = authState.User;
+    }
+
+
+    private void OnCancelPressed()
+    {
+        NavigationManager.NavigateTo("/shop");
+    }
+
+    private async void OnBuyPressed()
+    {
+        GameForm.Username = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
+        GameForm.Amount = item.Price.ToString();
+        try
+        {
+            var sufficientBalance = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:5122/api/blaze-lounge-user/check-balance", GameForm);
+            if (sufficientBalance.IsSuccessStatusCode)
+            {
+                var response = await HttpClient.PostAsJsonAsync<string>($"http://localhost:5122/api/blaze-lounge/shop/item/{item.IdItem}/buy?username={GameForm.Username}", item.IdItem.ToString());
+                if (response.IsSuccessStatusCode)
+                {
+                    NavigationManager.NavigateTo("/shop");
+                }
+                else
+                {
+                    ErrorMessage = "Error while buying the item. Please try again.";
+                }
+            }
+            else
+            {
+                ErrorMessage = "You don't have enough money";
+            }
+        }
+        catch
+        {
+            ErrorMessage = "Something went wrong";
+        }
+
+    }
+
+}
+

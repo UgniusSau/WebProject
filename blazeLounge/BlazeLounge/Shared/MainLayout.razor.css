@@ -1,0 +1,262 @@
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 20rem 1fr;
+    grid-template-rows: 5rem 2fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    height: 100vh;
+}
+
+.logoSpace {
+    grid-area: 1 / 1 / 2 / 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #F5F1F2;
+    background: rgb(47,37,46);
+    border-bottom: 3px solid #221B22;
+}
+
+#logoText {
+    font-family: Archive;
+    font-size: 1.8rem;
+    margin-left: 0.8rem;
+}
+
+::-webkit-scrollbar {
+    background: #221B22;
+    width: 0.5rem;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgb(47,37,46);
+    border-radius: 30px;
+}
+
+.topbar {
+    grid-area: 1 / 2 / 2 / 3;
+    display: flex;
+    justify-content: flex-end;
+    background: rgb(47,37,46);
+    border-bottom: 3px solid #221B22;
+}
+
+.topbar > #LogoutButtonWrapper {
+    display: flex;
+    margin-left: auto;
+    padding: 1rem;
+}
+
+.sidebar {
+    grid-area: 2 / 1 / 3 / 2;
+    background: #221B22;
+    display: flex;
+    flex-direction: column;
+    color: #F5F1F2;
+}
+
+#chatTextArea {
+    resize: none;
+    background: inherit;
+    border: none;
+    color: inherit;
+    padding: 10px;
+}
+
+#chatArea {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#chatBar {
+    width: 100%;
+    height: 2rem;
+    margin-top: auto;
+    display: flex;
+    flex-direction: row;
+    gap: 0px;
+}
+
+#fakeTypeBox {
+    background: rgb(47,37,46);
+    border-radius: 5rem;
+    width: 90%;
+    height: 80%;
+}
+
+.content {
+    grid-area: 2 / 2 / 3 / 3;
+    background: #3B2E3A;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #F5F1F2;
+}
+
+
+
+#chatBarElement {
+    position: relative;
+    box-sizing: border-box;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+#sendBtn {
+    transform: scale(0.8);
+    color: darkgray;
+    position: absolute;
+    bottom: 2px;
+    right: 12px;
+    background: transparent;
+    border: none;
+}
+
+main {
+    flex: 1;
+    background-color: pink;
+    height: 100vh;
+}
+
+.indicator {
+    color: black;
+    text-decoration: none;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+}
+
+.top-row {
+    background-color: #f7f7f7;
+    border-bottom: 1px solid #d6d5d5;
+    justify-content: center;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+}
+
+    .top-row ::deep a, .top-row ::deep .btn-link {
+        white-space: nowrap;
+        margin-left: 1.5rem;
+        text-decoration: none;
+    }
+
+        .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
+            text-decoration: underline;
+        }
+
+        .top-row ::deep a:first-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+@media (max-width: 640.98px) {
+    .top-row:not(.auth) {
+        display: none;
+    }
+
+    .top-row.auth {
+        justify-content: space-between;
+    }
+
+    .top-row ::deep a, .top-row ::deep .btn-link {
+        margin-left: 0;
+    }
+}
+
+@media (min-width: 641px) {
+    .page {
+        flex-direction: row;
+    }
+
+    .top-row {
+        top: 0;
+        z-index: 1;
+    }
+
+        .top-row.auth ::deep a:first-child {
+            flex: 1;
+            text-align: right;
+            width: 0;
+        }
+
+    .top-row, article {
+        padding-left: 2rem !important;
+        padding-right: 1.5rem !important;
+    }
+}
+.container {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#connectBtn {
+    width: 15rem;
+    height: 2rem;
+    font-size: 1rem;
+}
+
+/*Button stuff*/
+.btn {
+    height: 1rem;
+    width: 2rem;
+    border-radius: 50px;
+    font-family: "Fjalla";
+    font-size: 2rem;
+}
+
+    .btn:focus {
+        outline: 0;
+        box-shadow: 0 0 0 .1rem rgba(237, 34, 68, 0.3);
+    }
+
+    .btn:active {
+        animation: clicky-button 0.05s linear both;
+    }
+
+.btn-primary {
+    color: #F5F1F2;
+    background: rgba(237, 34, 68, 1);
+    border: 0px solid #ED2244;
+}
+
+    .btn-primary:hover {
+        background: rgba(237, 34, 68, 0.6);
+    }
+
+.btn-outline-primary {
+    color: #ED2244;
+    border: 4px solid;
+    border-color: #ED2244;
+    background: transparent;
+}
+
+    .btn-outline-primary:hover {
+        color: rgba(245, 241, 242, 0.8);
+        background: rgba(237, 34, 68, 0.1);
+    }
+
+@keyframes clicky-button {
+    0% {
+        transform: scale(1)
+    }
+
+    50% {
+        transform: scale(.95)
+    }
+
+    100% {
+        transform: scale(1)
+    }
+}

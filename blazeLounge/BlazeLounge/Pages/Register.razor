@@ -1,0 +1,92 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http.Json;
+@using BlazeLounge.Data.Models;
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+
+<div class="panel">
+    <h1 id="title">Create a new account</h1>
+
+<EditForm Model="@RegisterForm" OnValidSubmit="@HandleValidSubmit">
+    <div class="form-group">
+        <label for="username">Username:</label>
+        <InputText id="username" class="form-control" @bind-Value="@RegisterForm.Username" />
+        <ValidationMessage For="@(() => RegisterForm.Username)" />
+    </div>
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <InputText id="email" class="form-control" @bind-Value="@RegisterForm.Email" />
+        <ValidationMessage For="@(() => RegisterForm.Email)" />
+    </div>
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <InputText id="password" class="form-control" type="password" @bind-Value="@RegisterForm.Password" />
+        <ValidationMessage For="@(() => RegisterForm.Password)" />
+    </div>
+    <div class="form-group">
+        <label for="firstname">First name:</label>
+        <InputText id="firstname" class="form-control" @bind-Value="@RegisterForm.First_Name" />
+        <ValidationMessage For="@(() => RegisterForm.First_Name)" />
+    </div>
+    <div class="form-group">
+        <label for="lastname">Last name:</label>
+        <InputText id="lastname" class="form-control" @bind-Value="@RegisterForm.Last_Name" />
+        <ValidationMessage For="@(() => RegisterForm.Last_Name)" />
+    </div>
+    <div id="buttons">
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <button @onclick="OnCancelPressed" class="btn btn-outline-primary">Cancel</button>
+    </div>
+</EditForm>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <p id="errorMessage">@ErrorMessage</p>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<bool> CancelEventCallback { get; set; }
+    private RegisterModel RegisterForm { get; set; } = new RegisterModel();
+
+    private string ErrorMessage { get; set; }
+
+
+    private async Task HandleValidSubmit()
+    {
+        var validationResults = new List<ValidationResult>();
+        var isValid = Validator.TryValidateObject(RegisterForm, new ValidationContext(RegisterForm), validationResults, true);
+        if (!isValid)
+        {
+            var invalidFields = validationResults.Select(result => result.ErrorMessage);
+            ErrorMessage = $"The following fields are invalid: {string.Join(", ", invalidFields)}. Please correct them and try again.";
+            return;
+        }
+
+        try
+        {
+            var response = await HttpClient.PostAsJsonAsync<RegisterModel>("http://localhost:5122/api/blaze-lounge-user/register", RegisterForm);
+            if (response.IsSuccessStatusCode)
+            {
+                CancelEventCallback.InvokeAsync();
+            }
+            else
+            {
+                ErrorMessage = "Failed to register user.";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "An error occurred while registering user: " + ex.Message;
+        }
+    }
+
+
+    private void OnCancelPressed()
+    {
+        CancelEventCallback.InvokeAsync();
+    }
+}
+

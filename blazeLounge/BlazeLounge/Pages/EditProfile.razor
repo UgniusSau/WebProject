@@ -1,0 +1,71 @@
+﻿@page "/edit-profile"
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http.Json;
+@using BlazeLounge.Data.Models;
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h1>Edit profile</h1>
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <p>@ErrorMessage</p>
+}
+
+<AuthorizeView Context="authContext">
+    <Authorized>
+        <EditForm Model="@ChangePasswordForm" OnValidSubmit="@HandleValidSubmit" Context="editContext">
+        <div class="form-group">
+            <label for="currentPassword">Current password:</label>
+            <InputText id="currentPassword" type="password" class="form-control" @bind-Value="@ChangePasswordForm.CurrentPassword" />
+        </div>
+        <div class="form-group">
+            <label for="newPassword">New password:</label>
+            <InputText id="newPassword" type="password" class="form-control" @bind-Value="@ChangePasswordForm.NewPassword" />
+        </div>
+        <div style="display: flex; justify-content: center; margin: 1rem;">
+                <button type="submit" class="btn btn-primary">Change password</button>
+        </div>
+        </EditForm>
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/landing");
+        }
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    [Parameter]
+    public string userName { get; set; }
+
+    private ChangePasswordModel ChangePasswordForm { get; set; } = new ChangePasswordModel();
+
+    private string ErrorMessage { get; set; }
+
+    private async Task HandleValidSubmit()
+    {
+        ChangePasswordForm.Username = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
+        try
+        {
+            var response = await HttpClient.PostAsJsonAsync<ChangePasswordModel>($"http://localhost:5122/api/blaze-lounge-user/change-pass", ChangePasswordForm);
+            if (response.IsSuccessStatusCode)
+            {
+                // aš nenoriu naudot error message kaip būdo perduot ne errorus
+                ErrorMessage = "Password changed successfully!";
+            }
+            else
+            {
+                ErrorMessage = "Couldn't change password.";
+            }
+        }
+        catch (Exception ex)
+
+        {
+            ErrorMessage = "Error occurred while changing password: " + ex.Message;
+        }
+
+    }
+}

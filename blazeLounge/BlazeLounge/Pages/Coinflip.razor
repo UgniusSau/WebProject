@@ -1,0 +1,336 @@
+﻿@page "/coinflip"
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http.Json;
+@using BlazeLounge.Data.Models;
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<AuthorizeView>
+    <Authorized>
+        @*Coin animation stuff*@
+        <div class="gameContainer">
+            @if (!string.IsNullOrEmpty(ErrorMessage) && displayErrorMessage)
+            {
+                <div id="errorMessageCont">
+                    <a id="errorMessage">@ErrorMessage</a>
+                </div>
+            }
+            @*Main coin that displays the result*@
+            <div id="coin" class="@flipResult @swapping">
+                <div class="side-a">
+                    <svg fill="#000000" height="100%" width="120px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                         viewBox="0 0 488.02 488.02" xml:space="preserve">
+                    <g>
+                    <path d="M265.374,0c-28.5,0-55.5,6.4-79.6,17.8c-63.7,29.6-107.8,94-107.8,168.8l0,0v24.9v6l-38,72.5c-9.6,18.3-0.5,33.3,20.1,33.3
+		                h17.9v0.4v31.6v36.9c0,21.5,17.6,39.2,39.2,39.2l53.8-8l0.1,53.8v0.4l0,0c0.3,6.9,6.1,11.5,13.3,10.2l193.8-34.3
+		                c7.3-1.3,13.3-8.4,13.3-15.8v-8.5v-6.8v-98.6c37.1-34.1,60.4-83,60.4-137.4C451.774,83.4,368.274,0,265.374,0z M306.074,170.3
+		                c-18.8,32.6-37.6,65.2-56.5,97.8c-0.1,0.1-0.2,0.2-0.2,0.4c-1.3,2.4-2.8,4.7-6,3.5c-3.3-1.2-2.5-4.1-2.1-6.6
+		                c1.5-8.2,3-16.4,4.6-24.6c2.7-14.4,5.5-28.8,8.2-43.2c0.2-1.2,0.3-2.5,0.5-4.2c-1.8-0.1-3.3-0.2-4.8-0.2c-10.6,0-21.3,0.1-31.9,0.1
+		                c-6.3,0-7.7-2.6-4.6-8.1c18.8-32.6,37.6-65.2,56.5-97.8c0.1-0.1,0.2-0.2,0.2-0.4c1.3-2.4,2.8-4.7,6-3.5c3.3,1.2,2.5,4.1,2.1,6.6
+		                c-1.5,8.2-3,16.4-4.6,24.6c-2.7,14.4-5.5,28.8-8.2,43.2c-0.2,1.2-0.3,2.5-0.5,4.2c1.8,0.1,3.3,0.2,4.8,0.2
+		                c10.6,0,21.3-0.1,31.9-0.1C307.774,162.2,309.274,164.8,306.074,170.3z" />
+                </g>
+                </svg>
+                </div>
+                <div class="side-b">
+                    <svg width="120px" height="100%" viewBox="0 0 267 272" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M89.381 55.4313C89.381 55.4313 83.9023 56.237 85.5137 72.1896C87.125 88.1422 69.3999 126.493 50.7079 150.18C32.016 173.867 -17.2922 231.474 6.23393 265.555C6.23393 265.555 25.2482 243.076 34.5942 235.905C43.9401 228.735 64.888 211.493 70.689 200.455C70.689 200.455 72.9449 203.114 72.6226 210.768C72.6226 210.768 86.8028 216.327 106.139 165.649C106.139 165.649 112.907 170.886 104.85 208.834C104.85 208.834 132.888 190.545 133.21 145.668C133.21 145.668 130.632 113.199 144.168 101.839C144.168 101.839 156.092 167.019 158.992 172.739C161.893 178.46 159.637 184.341 159.637 184.341C159.637 184.341 174.139 148.005 178.973 151.469C178.973 151.469 169.305 212.46 214.424 225.592C214.424 225.592 221.192 229.863 214.424 212.057C210.394 201.116 209.721 189.221 212.49 177.896C212.49 177.896 212.732 201.502 238.272 223.659C263.812 245.815 257.609 272 257.609 272C257.609 272 281.699 225.351 248.585 189.498C215.471 153.645 229.168 93.218 236.983 80.5687C236.983 80.5687 226.59 78.0711 215.068 97.9716C203.547 117.872 187.917 151.872 182.196 88.9479C176.476 26.0237 176.637 22.3175 137.078 0C137.078 0 155.045 29.7299 134.499 68.9668C113.954 108.204 107.428 107.64 107.428 107.64C107.428 107.64 106.462 71.545 89.381 55.4313Z" fill="#ED2244" />
+                    </svg>
+                </div>
+            </div>
+
+            <EditForm Model="@GameForm" OnValidSubmit="@HandleValidSubmit" Context="editContext">
+                <div class="form-group">
+                    <div class="top-row">
+                        @*Cia keiciam betAmount lokaliai ir kiekviena syki updatinam formoj esanti amount*@
+
+                        @*Input box kur galima irasyti bet value, mygtukai salia kurie ji keicia*@
+                        <InputText  style="flex-grow:3; background: #F5F1F210; border: 2px solid #F5F1F2; border-radius: 10px; color: #F5F1F2;" placeholder="Bet amount:" id="amount" @bind-Value="@GameForm.Amount" />
+                        <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => addValueToInput(1)">+1</button>
+                        <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => addValueToInput(10)">+10</button>
+                        <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => addValueToInput(100)">+100</button>
+                        <button class="btn btn-cancel" style="flex-grow:1; min-width: 60px" @onclick="clearValue">x</button>
+                    </div>
+
+                </div>
+
+                @*Old coin side selection*@
+@*                <div class="form-group">
+                    <select id="coin" class="form-control"
+                            @bind="@GameForm.CoinSide"
+                            ValueExpression="@(() => GameForm.CoinSide)"
+                            ValueChanged="@((string value) => GameForm.CoinSide = value)">
+                        <option value="heads">Heads</option>
+                        <option value="tails">Tails</option>
+                    </select>
+                </div>*@
+                <div id="bottomRow">
+                    @*Two coins for picking the winning side*@
+                    <div id="sidePicker">
+
+                        @*Red (heads) coin*@
+                        <div class="selectionCoin" @onclick="() => selectBetSide(heads)">
+                            <div class="side-a @coin1state">
+                                <svg fill="#000000" height="100%" width="3rem" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                     viewBox="0 0 488.02 488.02" xml:space="preserve">
+                                <g>
+                                <path d="M265.374,0c-28.5,0-55.5,6.4-79.6,17.8c-63.7,29.6-107.8,94-107.8,168.8l0,0v24.9v6l-38,72.5c-9.6,18.3-0.5,33.3,20.1,33.3
+		                h17.9v0.4v31.6v36.9c0,21.5,17.6,39.2,39.2,39.2l53.8-8l0.1,53.8v0.4l0,0c0.3,6.9,6.1,11.5,13.3,10.2l193.8-34.3
+		                c7.3-1.3,13.3-8.4,13.3-15.8v-8.5v-6.8v-98.6c37.1-34.1,60.4-83,60.4-137.4C451.774,83.4,368.274,0,265.374,0z M306.074,170.3
+		                c-18.8,32.6-37.6,65.2-56.5,97.8c-0.1,0.1-0.2,0.2-0.2,0.4c-1.3,2.4-2.8,4.7-6,3.5c-3.3-1.2-2.5-4.1-2.1-6.6
+		                c1.5-8.2,3-16.4,4.6-24.6c2.7-14.4,5.5-28.8,8.2-43.2c0.2-1.2,0.3-2.5,0.5-4.2c-1.8-0.1-3.3-0.2-4.8-0.2c-10.6,0-21.3,0.1-31.9,0.1
+		                c-6.3,0-7.7-2.6-4.6-8.1c18.8-32.6,37.6-65.2,56.5-97.8c0.1-0.1,0.2-0.2,0.2-0.4c1.3-2.4,2.8-4.7,6-3.5c3.3,1.2,2.5,4.1,2.1,6.6
+		                c-1.5,8.2-3,16.4-4.6,24.6c-2.7,14.4-5.5,28.8-8.2,43.2c-0.2,1.2-0.3,2.5-0.5,4.2c1.8,0.1,3.3,0.2,4.8,0.2
+		                c10.6,0,21.3-0.1,31.9-0.1C307.774,162.2,309.274,164.8,306.074,170.3z" />
+                            </g>
+                            </svg>
+                            </div>
+                        </div>
+                        @*Black (tails) coin*@
+                        <div class="selectionCoin" @onclick="() => selectBetSide(tails)">
+                            <div class="side-b @coin2state">
+                                <svg width="3rem" height="100%" viewBox="0 0 267 272" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M89.381 55.4313C89.381 55.4313 83.9023 56.237 85.5137 72.1896C87.125 88.1422 69.3999 126.493 50.7079 150.18C32.016 173.867 -17.2922 231.474 6.23393 265.555C6.23393 265.555 25.2482 243.076 34.5942 235.905C43.9401 228.735 64.888 211.493 70.689 200.455C70.689 200.455 72.9449 203.114 72.6226 210.768C72.6226 210.768 86.8028 216.327 106.139 165.649C106.139 165.649 112.907 170.886 104.85 208.834C104.85 208.834 132.888 190.545 133.21 145.668C133.21 145.668 130.632 113.199 144.168 101.839C144.168 101.839 156.092 167.019 158.992 172.739C161.893 178.46 159.637 184.341 159.637 184.341C159.637 184.341 174.139 148.005 178.973 151.469C178.973 151.469 169.305 212.46 214.424 225.592C214.424 225.592 221.192 229.863 214.424 212.057C210.394 201.116 209.721 189.221 212.49 177.896C212.49 177.896 212.732 201.502 238.272 223.659C263.812 245.815 257.609 272 257.609 272C257.609 272 281.699 225.351 248.585 189.498C215.471 153.645 229.168 93.218 236.983 80.5687C236.983 80.5687 226.59 78.0711 215.068 97.9716C203.547 117.872 187.917 151.872 182.196 88.9479C176.476 26.0237 176.637 22.3175 137.078 0C137.078 0 155.045 29.7299 134.499 68.9668C113.954 108.204 107.428 107.64 107.428 107.64C107.428 107.64 106.462 71.545 89.381 55.4313Z" fill="#ED2244" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*Play button*@
+                    <div id="playBtn" style="display: flex; justify-content: center; margin: 1rem; flex-grow: 1">
+                        <button disabled="@IsPlayBtnDisabled" @onclick="onClickPlay" class="btn btn-primary">Play</button>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/landing");
+        }
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    private UniversalGameModel GameForm { get; set; } = new UniversalGameModel();
+
+    private string ErrorMessage { get; set; }
+    private string? flipResult { get; set; }
+    private double betAmount { get; set; }
+    private string selectedSide { get; set; }
+    private string coin1state { get; set; }
+    private string coin2state { get; set; }
+    private bool shouldBeginGame { get; set; }
+    private string swapping { get; set; }
+    private bool displayErrorMessage { get; set; }
+    private bool IsPlayBtnDisabled { get; set; }
+    private TaskCompletionSource<bool> _animationCompleted = new TaskCompletionSource<bool>();
+
+    //eficent
+    string heads = "heads";
+    string tails = "tails";
+
+    protected override void OnInitialized()
+    {
+        swapping = "";
+        EnablePlayButton();
+        base.OnInitialized();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        displayErrorMessage = false;
+        if (!shouldBeginGame)
+        {
+            return;
+        }
+        else
+        {
+            shouldBeginGame = false;
+        }
+        flipResult = null;
+        DisablePlayButton();
+        GameForm.Username = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
+        GameForm.GameName = "Coinflip";
+        try
+        {
+            var sufficientBalance = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:5122/api/blaze-lounge-user/check-balance", GameForm);
+            if (sufficientBalance.IsSuccessStatusCode && Convert.ToDouble(GameForm.Amount) > 0)
+            {
+                //create random number generator from 0 to 100
+                Random random = new Random();
+                int number = random.Next(0, 100);
+                ErrorMessage = "";
+                StateHasChanged();
+                if(GameForm.CoinSide is not null)
+                {
+                    if ((GameForm.CoinSide == "heads" && number < 50) || (GameForm.CoinSide == "tails" && number >= 50))
+                    {
+                        GameForm.Won = true;
+                        ErrorMessage += string.Format("You won! Amount: {0}. Your current balance: ", Math.Round(2 * double.Parse(GameForm.Amount), 2));
+                        StateHasChanged();
+                    }
+                    else
+                    {
+                        GameForm.Won = false;
+                        ErrorMessage += string.Format("You lost. Amount: {0}. Your current balance: ", Math.Round(double.Parse(GameForm.Amount), 2));
+                        StateHasChanged();
+                    }
+
+                    var updateGameStats = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:5122/api/blaze-lounge/update-user-game-stats", GameForm);
+                    if (!updateGameStats.IsSuccessStatusCode)
+                        ErrorMessage += "Error occured while updating statistics\n";
+
+
+                    var response = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:5122/api/blaze-lounge-user/change-balance", GameForm);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        PerformAnimation(number);
+                        await Task.Delay(3000);
+                        ErrorMessage += "\n" + await response.Content.ReadAsStringAsync();
+                        displayErrorMessage = true;
+                        EnablePlayButton();
+                        StateHasChanged();
+                    }
+                }
+                else
+                {
+                    ErrorMessage = "Select a coin side by clicking one of the coin icons!";
+                    displayErrorMessage = true;
+                    EnablePlayButton();
+                    StateHasChanged();
+                }
+            }
+            else
+            {
+                ErrorMessage = "Invalid bet!";
+                displayErrorMessage = true;
+                EnablePlayButton();
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+
+        {
+            ErrorMessage = "Error occurred while checking balance: " + ex.Message;
+            displayErrorMessage = true;
+            EnablePlayButton();
+            StateHasChanged();
+        }
+
+    }
+
+    //Coin animation code
+
+    private async void PerformAnimation(int number) 
+    {
+        if (number < 50)
+        {
+            //heads
+            flipResult = "heads";
+        }
+        else if (number >= 50)
+        {
+            flipResult = "tails";
+        }
+        StateHasChanged();
+        await Task.Delay(3000);
+
+        if (flipResult =="tails")
+        {
+            await Task.Delay(1000);
+            flipResult = heads;
+            swapTailsToHeads();
+            await Task.Delay(500);
+            swapping = "";
+            flipResult = "";
+        }
+        return;
+    }
+
+    //Additional game logic code
+
+    /// <summary>
+    /// adds value to bet amount.
+    /// </summary>
+    /// <param name="value"></param>
+    private void addValueToInput(int value)
+    {
+        betAmount += value;
+        updateGameformBetValue();
+    }
+
+    /// <summary>
+    /// Clears betAmount value
+    /// </summary>
+    private void clearValue()
+    {
+        betAmount = 0;
+        updateGameformBetValue();
+    }
+
+    /// <summary>
+    /// Updates the form amount bet value according to local betAmount
+    /// </summary>
+    private void updateGameformBetValue()
+    {
+        GameForm.Amount = Convert.ToString(betAmount);
+    }
+
+    private void selectBetSide(string coinSide)
+    {
+        if (coinSide == "heads" || coinSide == "tails")
+        {
+            selectedSide = coinSide;
+        }
+        updateSelectedCoin();
+    }
+
+    private void updateSelectedCoin()
+    {
+        GameForm.CoinSide = selectedSide;
+        if (selectedSide == heads)
+        {
+            coin1state = "selectedCoin";
+            coin2state = "";
+        }
+        else if (selectedSide == tails)
+        {
+            coin2state = "selectedCoin";
+            coin1state = "";
+        }
+
+    }
+
+    private void allowGameToBegin()
+    {
+        shouldBeginGame = true;
+    }
+
+    private void onClickPlay()
+    {
+        allowGameToBegin();
+        HandleValidSubmit();
+    }
+
+    /// <summary>
+    /// Gives the main coin the "swapping" class to reset it's position back to default
+    /// </summary>
+    private void swapTailsToHeads()
+    {
+        swapping = "swapping";
+        StateHasChanged();
+    }
+
+    private void DisablePlayButton()
+    {
+        IsPlayBtnDisabled = true;
+    }
+
+    private void EnablePlayButton()
+    {
+        IsPlayBtnDisabled = false;
+    }
+}

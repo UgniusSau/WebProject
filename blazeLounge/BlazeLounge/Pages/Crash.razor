@@ -1,0 +1,370 @@
+﻿@page "/crash"
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http.Json;
+@using BlazeLounge.Data.Models;
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@implements IAsyncDisposable
+
+<AuthorizeView>
+    <Authorized>
+        @{
+            if(crashConnection != null)
+            {
+                if(gameState != null)
+                {
+                    //Uncomment for side panel that displays useful information
+
+                    //<div id="debug">
+                    //    <p>DEBUG WINDOW</p>
+                    //    <p>Game state: @gameState.CurrentStage</p>
+                    //    <p>Countdown: @gameState.Countdown</p>
+                    //    <p>Will crash on: @gameState.CrashingPoint.ToString("#.##")x</p>
+                    //    <p>Rocket rotation value: @RocketRotationDeg</p>
+                    //</div>
+
+                    <div id="game-container">
+                        <div id="crash-animation-window">
+                            <div id="star-background" style="--multiplier:@String.Format("{0}%", gameState.CrashValue*60)">
+                                <div id="line-background" style="--multiplier:@String.Format("{0}%", gameState.CrashValue*90)">
+                                    <div id="payout-display" style="color: @MultiplierDisplayColor">
+                                        @if (@gameState.CrashValue.ToString("#.##") == "")
+                                        {
+                                            <p class="multiplier">0.00x</p>
+                                        }
+                                        else
+                                        {
+                                            <p class="multiplier">@gameState.CrashValue.ToString("#.##")x</p>
+                                        }
+                                        <p class="description">@MultiplierDisplayMsg</p>
+                                        @if (!disableCashoutMessage)
+                                        {
+                                            <p class="cashed-out-msg">Cashed out @@ @MultiplierDuringCashout</p>
+                                        }
+                                    </div>
+                                    <div id="rocketContainer" style="--rotationDeg:@RocketRotationStyle">
+                                        <img draggable="false" src="images/Rocket.png" id="rocket" />
+                                        <div id="smoke-trail">
+                                            @if (!stopRocketAnimation)
+                                            {
+                                                for (int i = 0; i < 10; i++)
+                                                {
+                                                    /*Smoke particle generation*/
+                                                    <div class="particle" style="">
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                    @if (overlayAnimationScreen)
+                                    {
+                                        <div class="overlay"></div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div id="game-button-container">
+                            <EditForm Model="@GameForm" OnValidSubmit="@HandleValidSubmit" Context="editContext">
+                                <div class="form-group">
+                                    <div class="top-row">
+                                        <InputText style="flex-grow:3; background: #F5F1F210; border: 2px solid #F5F1F2; border-radius: 10px; color: #F5F1F2;" placeholder="Bet amount:" id="amount" @bind-Value="@GameForm.Amount" />
+                                        <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => AddValueToInput(1)">+1</button>
+                                        <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => AddValueToInput(10)">+10</button>
+                                        <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => AddValueToInput(100)">+100</button>
+                                        <button class="btn btn-cancel" style="flex-grow:1; min-width: 60px" @onclick="ClearValue">x</button>
+                                    </div>
+                                </div>
+                                <div id="bottomRow">
+                                    <div id="playBtn">
+                                        <button disabled="@(BetLockedIn || disablePlayBtn)" @onclick="OnClickPlay" class="btn btn-primary">Confirm wager</button>
+                                    </div>
+                                    <div id="cashBtn">
+                                        <button disabled="@(CashedOut || disableCashoutBtn)" @onclick="OnClickCashout" class="btn btn-primary">Cash out</button>
+                                    </div>
+                                </div>
+                            </EditForm>
+                        </div>
+                        @if (!string.IsNullOrEmpty(ErrorMessage) && DisplayErrorMessage)
+                        {
+                        <div id="errorMessageCont">
+                            <a id="errorMessage">@ErrorMessage</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div id="errorMessageCont">
+                                <a id="errorMessage"></a>
+                            </div>
+                        }
+                    </div>
+                    //Delete this part once bet selection buttons are done
+                    //if(gameState.CurrentStage == CrashGameState.Stage.BETTING)
+                    //{
+                    //    <EditForm Model="@GameForm" OnValidSubmit="@HandleValidSubmit" Context="editContext">
+                    //    <div class="form-group">
+                    //        <div class="top-row">
+                    //            <InputText  style="flex-grow:3; background: #F5F1F210; border: 2px solid #F5F1F2; border-radius: 10px; color: #F5F1F2;" placeholder="Bet amount:" id="amount" @bind-Value="@GameForm.Amount" />
+                    //            <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => AddValueToInput(1)">+1</button>
+                    //            <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => AddValueToInput(10)">+10</button>
+                    //            <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => AddValueToInput(100)">+100</button>
+                    //            <button class="btn btn-cancel" style="flex-grow:1; min-width: 60px" @onclick="ClearValue">x</button>
+                    //        </div>
+                    //    </div>
+                    //    <div id="bottomRow">
+                    //        <div id="playBtn" style="display: flex; justify-content: center; margin: 1rem; flex-grow: 1">
+                    //            <button disabled="@BetLockedIn" @onclick="OnClickPlay" class="btn btn-primary">Play</button>
+                    //        </div>
+                    //    </div>
+                    //    </EditForm>
+                    //} 
+                    //else if (gameState.CurrentStage == CrashGameState.Stage.IN_PROGRESS)
+                    //{
+                    //    if (BetLockedIn)
+                    //    {
+                    //        <div id="bottomRow">
+                    //             <div id="cashBtn" style="display: flex; justify-content: center; margin: 1rem;">
+                    //                <button disabled="@CashedOut" @onclick="OnClickCashout" class="btn btn-primary">Cash out</button>
+                    //            </div>
+                    //        </div>
+                    //    }
+                    //}
+                }
+            }
+        }
+
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/landing");
+        }
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private UniversalGameModel GameForm { get; set; } = new UniversalGameModel();
+    private HubConnection? crashConnection;
+    private CrashGameState? gameState;
+
+    private string ErrorMessage { get; set; }
+    private double BetAmount { get; set; }
+    private bool BetLockedIn { get; set; } 
+    private bool DisplayErrorMessage { get; set; } 
+    private bool CashedOut { get; set; } 
+    private float RocketRotationDeg { get; set; }
+    private string RocketRotationStyle { get; set; }
+    private Random rand { get; set; }
+    private bool stopRocketAnimation { get; set; }
+    private bool overlayAnimationScreen { get; set; }
+    private bool disablePlayBtn { get; set; }
+    private bool disableCashoutBtn { get; set; }
+    private bool disableCashoutMessage { get; set; }
+    private string MultiplierDuringCashout { get; set; }
+    private string MultiplierDisplayMsg { get; set; }
+    private string MultiplierDisplayColor { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        rand = new Random();
+        disablePlayBtn = true;
+        disableCashoutBtn = true;
+        MultiplierDisplayColor = "#FFFFFF";
+        MultiplierDisplayMsg = "The game is loading...";
+        disableCashoutMessage = true;
+        MultiplierDuringCashout = "EMPTY";
+
+        if (crashConnection == null)
+            await Connect();
+    }
+    /// <summary>
+    /// Atnaujina raketos pasisukima lerpinant tarp minRot ir maxRot pagal currentMult ir maxMult.
+    /// </summary>
+    /// <param name="currentMultiplier">Dabartinis multiplier pagal kuri paskaiciuojamas raketos pasisukimas</param>
+    /// <param name="maxMultiplier">Maksimalus imanomas multiplier nustatomas CrashHub</param>
+    /// <param name="minRot">Minimalus raketos pasisukimas laipsniais</param>
+    /// <param name="maxRot">Maksimalus raketos pasisukimas laipsniais</param>
+    private void UpdateRocketRotation(float currentMultiplier, float maxMultiplier=16, float minRot=0, float maxRot=-40)
+    {
+        //Lerpinam 
+        float rotationf = currentMultiplier / maxMultiplier;
+        RocketRotationDeg = Lerp(minRot, maxRot, rotationf);
+        RocketRotationStyle = String.Format("{0}deg", RocketRotationDeg);
+        StateHasChanged();
+    }
+
+    //Linear interpolation
+    private float Lerp(float firstFloat, float secondFloat, float by)
+    {
+        return firstFloat * (1 - by) + secondFloat * by;
+    }
+
+    private async Task HandleValidSubmit(){}
+
+    private async Task Connect()
+    {
+        crashConnection = new HubConnectionBuilder() 
+            .WithUrl("http://localhost:5122/crashhub")
+            .Build();
+
+
+        crashConnection.On<CrashGameState>("UpdateGameState", state =>
+        {
+            this.gameState = state;
+            UpdateRocketRotation(gameState.CrashValue);
+            if (gameState.CurrentStage == CrashGameState.Stage.BETTING)
+            {
+                MultiplierDisplayMsg = String.Format("Place your bets. A new game is starting in: {0}", gameState.Countdown.Seconds);
+            }
+            //StateHasChanged();
+        });
+
+        // Sitas eventas kvieciamas kiekviena karta kai pasikeicia zaidimo busena
+        crashConnection.On<CrashGameState.Stage>("StageChange", async stage =>
+        {
+            StateHasChanged();
+            switch (stage)
+            {
+                case CrashGameState.Stage.BETTING:
+                    MultiplierDisplayMsg = "Place your bets. A new game is starting in: 9";
+                    MultiplierDisplayColor = "rgba(255,255,255,0.9)";
+                    stopRocketAnimation = true;
+                    overlayAnimationScreen = true;
+                    disablePlayBtn = false;
+                    disableCashoutBtn = true;
+                    disableCashoutMessage = true;
+
+                    BetAmount = 0;
+                    BetLockedIn = false;
+                    DisplayErrorMessage = false;
+                    break;
+                case CrashGameState.Stage.IN_PROGRESS:
+                    MultiplierDisplayMsg = "Current multiplier";
+                    MultiplierDisplayColor = "#FFFFFF";
+                    disablePlayBtn = true;
+                    if (BetLockedIn) disableCashoutBtn = false; else disableCashoutBtn = true;
+                    disableCashoutMessage = true;
+
+                    stopRocketAnimation = false;
+                    overlayAnimationScreen = false;
+                    CashedOut = false;
+                    break;
+                case CrashGameState.Stage.CRASHED:
+                    MultiplierDisplayMsg = "The rocket crashed.";
+                    MultiplierDisplayColor = "red";
+                    disablePlayBtn = true;
+                    disableCashoutBtn = true;
+
+                    overlayAnimationScreen = true;
+                    stopRocketAnimation = true;
+
+                    if (BetLockedIn)
+                    {
+                        if (CashedOut)
+                        {
+                            GameForm.Username = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
+                            GameForm.Amount = BetAmount.ToString("#.##");
+                            GameForm.Won = true;
+                            GameForm.GameName = "Crash";
+                            var updateGameStats = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:5122/api/blaze-lounge/update-user-game-stats", GameForm);
+                            if (!updateGameStats.IsSuccessStatusCode)
+                                ErrorMessage += "Error occured while updating statistics\n";
+                        }
+                        else
+                        {
+                            GameForm.Username = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
+                            GameForm.Amount = BetAmount.ToString("#.##");
+                            GameForm.Won = false;
+                            GameForm.GameName = "Crash";
+                            var updateGameStats = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:5122/api/blaze-lounge/update-user-game-stats", GameForm);
+                            if (!updateGameStats.IsSuccessStatusCode)
+                                ErrorMessage += "Error occured while updating statistics\n";
+                        }
+                    }
+
+                    break;
+                default:
+                    break;
+            }
+            StateHasChanged();
+        });
+
+        await crashConnection.StartAsync();
+    }
+
+    private async Task OnClickCashout()
+    {
+        if (BetLockedIn && !CashedOut)
+        {
+            GameForm.Username = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
+            // kuris gameform amount sugalvojo string padaryt :skull:
+            // :D :D :D :D
+            GameForm.Amount = (BetAmount * gameState.CrashValue).ToString("#.##");
+            GameForm.Won = true;
+            var response = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:5122/api/blaze-lounge-user/change-balance", GameForm);
+            if (response.IsSuccessStatusCode)
+            {
+                BetAmount = Math.Round(double.Parse(GameForm.Amount), 2);
+                MultiplierDuringCashout = gameState.CrashValue.ToString("#.##");
+                disableCashoutMessage = false;
+                DisplayErrorMessage = true;
+                BetLockedIn = true;
+            }
+            CashedOut = true;
+        }
+    }
+
+    private async Task OnClickPlay()
+    {
+        GameForm.Username = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
+        var sufficientBalance = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:5122/api/blaze-lounge-user/check-balance", GameForm);
+        if (sufficientBalance.IsSuccessStatusCode && Convert.ToDouble(GameForm.Amount) > 0)
+        {
+            GameForm.Won = false;
+            var response = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:5122/api/blaze-lounge-user/change-balance", GameForm);
+            if (response.IsSuccessStatusCode)
+            {
+                BetAmount = double.Parse(GameForm.Amount);
+                ErrorMessage = "Bet locked in.";
+                DisplayErrorMessage = true;
+                BetLockedIn = true;
+            }
+        }
+        else
+        {
+            ErrorMessage = "Invalid bet.";
+            DisplayErrorMessage = true;
+            StateHasChanged();
+        }
+
+    }
+
+
+    // TODO: remove lieva saro koda testavimui paimta is coinflipo
+    // TODO: panaikint viliaus komentara apie lieva saro koda nes saro kodas nebuna lievas
+    // ------------------------------
+    private void AddValueToInput(int value)
+    {
+        BetAmount += value;
+        UpdateGameformBetValue();
+    }
+
+    private void ClearValue()
+    {
+        BetAmount = 0;
+        UpdateGameformBetValue();
+    }
+
+    private void UpdateGameformBetValue()
+    {
+        GameForm.Amount = Convert.ToString(BetAmount);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (crashConnection is not null)
+        {
+            await crashConnection.DisposeAsync();
+        }
+    }
+
+}
