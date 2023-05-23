@@ -1,11 +1,17 @@
 ﻿using BlazeLounge.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using System.Linq;
 using BlazeLounge.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using BlazeLounge.Services.Shop;
+using System.Globalization;
 
 namespace BlazeLounge.Server.Controllers
 {

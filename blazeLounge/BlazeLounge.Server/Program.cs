@@ -1,8 +1,14 @@
 using BlazeLounge.Repositories.Users;
 using BlazeLounge.Repositories.Shop;
 using BlazeLounge.Services;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
+using SQLitePCL;
+using System.Reflection;
+using Microsoft.EntityFrameworkCore.Sqlite;
+using Microsoft.Extensions.Configuration;
 using BlazeLounge.Data.Models;
 using Microsoft.AspNetCore.ResponseCompression;
 using BlazeLounge.Server.Hubs;

@@ -1,4 +1,7 @@
-﻿namespace BlazeLounge.Data.Models;
+﻿using System;
+using System.Collections.Generic;
+
+namespace BlazeLounge.Data.Models;
 
 public partial class Badge
 {

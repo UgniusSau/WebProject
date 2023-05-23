@@ -1,4 +1,5 @@
-﻿namespace BlazeLounge.Data.Models
+﻿
+namespace BlazeLounge.Data.Models
 {
     public class ChangePasswordModel
     {
