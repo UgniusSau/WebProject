@@ -1,4 +1,4 @@
-﻿namespace BlazeLounge.Data.Models;
+﻿namespace Blazelounge_v2.Data.Models;
 
 public partial class BackgroundColor
 {

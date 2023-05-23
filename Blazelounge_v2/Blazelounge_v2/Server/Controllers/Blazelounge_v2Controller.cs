@@ -1,22 +1,23 @@
-﻿using BlazeLounge.Services;
+using Blazelounge_v2.Data.Models;
+using Blazelounge_v2.Services;
+using Blazelounge_v2.Shared;
 using Microsoft.AspNetCore.Mvc;
-using BlazeLounge.Data.Models;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using BlazeLounge.Services.Shop;
 
-namespace BlazeLounge.Server.Controllers
+namespace Blazelounge_v2.Server.Controllers
 {
     [ApiController]
-    public class BlazeLoungeController : ControllerBase
+    //[Route("[controller]")]
+    public class Blazelounge_v2Controller : ControllerBase
     {
         private readonly IUserService _userService;
         private readonly IShopService _shopService;
         private readonly IConfiguration _configuration;
 
-        public BlazeLoungeController(IUserService userService, IShopService shopService, IConfiguration configuration)
+        public Blazelounge_v2Controller(IUserService userService, IShopService shopService, IConfiguration configuration)
         {
             _userService = userService;
             _shopService = shopService;
@@ -79,7 +80,7 @@ namespace BlazeLounge.Server.Controllers
             return Ok(profile);
         }
 
-        
+
 
 
         [HttpPost("api/blaze-lounge-user/register")]
@@ -108,7 +109,7 @@ namespace BlazeLounge.Server.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest( ex.Message);
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -169,54 +170,54 @@ namespace BlazeLounge.Server.Controllers
 
         }
 
-		[HttpPost("api/blaze-lounge-user/change-balance")]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest)]
-		public async Task<ActionResult<string>> ChangeBalance(UniversalGameModel gameModel, string? game=null)
+        [HttpPost("api/blaze-lounge-user/change-balance")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<string>> ChangeBalance(UniversalGameModel gameModel, string? game = null)
         {
-			try
-			{
+            try
+            {
                 string wholeNumber = gameModel.Amount.Split('.')[0];
 
                 if (await _userService.ChangeBalance(gameModel.Username, gameModel.Won, double.Parse(wholeNumber), game))
-				{
+                {
                     var user = await _userService.GetUserByName(gameModel.Username);
                     var profile = await _userService.GetUserProfile(user.FkProfileidProfile.ToString());
                     return Ok(profile.Currency.ToString());
-				}
-				return BadRequest("Error occurred while changing balance");
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(ex.Message);
-			}
-			catch (Exception ex)
-			{
-				return BadRequest($"Failed to change balance: {ex.Message}");
-			}
-		}
+                }
+                return BadRequest("Error occurred while changing balance");
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Failed to change balance: {ex.Message}");
+            }
+        }
 
-		[HttpPost("api/blaze-lounge-user/check-balance")]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest)]
-		public async Task<ActionResult<bool>> CheckBalance(UniversalGameModel gameModel)
-		{
-			try
-			{
+        [HttpPost("api/blaze-lounge-user/check-balance")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<bool>> CheckBalance(UniversalGameModel gameModel)
+        {
+            try
+            {
                 bool hasEnough = await _userService.CheckBalance(gameModel.Username, Double.Parse(gameModel.Amount));
                 if (hasEnough)
                     return Ok(true);
-				return BadRequest(false);
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(ex.Message);
-			}
-			catch (Exception ex)
-			{
-				return BadRequest($"Failed to check balance: {ex.Message}");
-			}
-		}
+                return BadRequest(false);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Failed to check balance: {ex.Message}");
+            }
+        }
 
         [HttpGet("api/lucky-wheel/can-spin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -225,7 +226,7 @@ namespace BlazeLounge.Server.Controllers
         {
             DateTime? lastSpin = await _userService.GetSpinTime(userName);
 
-            if(lastSpin == null)
+            if (lastSpin == null)
             {
                 // No previous spin
                 return Ok(true);
@@ -253,7 +254,7 @@ namespace BlazeLounge.Server.Controllers
             }
             else
             {
-                if(DateTime.UtcNow - lastSpin >= TimeSpan.FromHours(24))
+                if (DateTime.UtcNow - lastSpin >= TimeSpan.FromHours(24))
                 {
                     await _userService.UpdateSpin(userName);
                     return Ok(values[Random.Shared.Next(values.Count)]);
@@ -377,7 +378,5 @@ namespace BlazeLounge.Server.Controllers
                 return BadRequest($"Failed to buy item: {ex.Message}");
             }
         }
-
     }
-
 }
