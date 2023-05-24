@@ -1,0 +1,85 @@
+﻿#logoSection {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+#logoText {
+    color: #F5F1F2;
+    font-size: 6rem;
+    font-family: "Archive" !important;
+    user-select: none;
+}
+
+#buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+/*Button stuff*/
+.btn {
+    height: 5rem;
+    width: 12rem;
+    border-radius: 50px;
+    font-family: "Fjalla";
+    font-size: 2rem;
+}
+    .btn:focus {
+        outline: 0;
+        box-shadow: 0 0 0 .1rem rgba(237, 34, 68, 0.3); 
+    }
+
+    .btn:active {
+        animation: clicky-button 0.05s linear both;
+    }
+.btn-primary {
+    color: #F5F1F2;
+    background: rgba(237, 34, 68, 1);
+    border: 0px solid #ED2244;
+}
+
+.btn-primary:hover {
+    background: rgba(237, 34, 68, 0.6);
+}
+
+.btn-outline-primary {
+    color: #ED2244;
+    border: 4px solid;
+    border-color: #ED2244;
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    color: rgba(245, 241, 242, 0.8);
+    background: rgba(237, 34, 68, 0.1);
+}
+
+@keyframes clicky-button {
+    0% {
+        transform: scale(1)
+    }
+
+    50% {
+        transform: scale(.95)
+    }
+
+    100% {
+        transform: scale(1)
+    }
+}
+
+/*Registration form stuff*/
+
+#screenCover {
+    position: absolute;
+    background: rgba(11, 9, 11, 0.6);
+    width: 200vw;
+    height: 200vh;
+    transform: translate(0, -20%);
+}
+
+#registrationWrapper, #loginWrapper {
+    position: absolute;
+    transform: translate(0, -2.5rem);
+    z-index: 2;
+}

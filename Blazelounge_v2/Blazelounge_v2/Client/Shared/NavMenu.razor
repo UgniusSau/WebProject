@@ -1,26 +1,67 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize]
+
+@*
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Blazelounge_v2</a>
+        <a class="navbar-brand" href="">BlazeLounge</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
     </div>
 </div>
 
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
+*@
+
+<AuthorizeView>
+    @if (context.User.Identity.IsAuthenticated)
+    {
+        var userName = context.User.Identity.Name;
+
+        <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+            <nav id="NavBarWrapper">
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        <span class="oi oi-home" aria-hidden="true"></span> Home
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href=@($"profile/{userName}")>
+                        <span class="oi oi-person" aria-hidden="true"></span> Display user profile
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="coinflip">
+                        <span class="oi oi-arrow-circle-top" aria-hidden="true"></span> Coinflip
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="mine-sweeper">
+                        <span class="oi oi-flag" aria-hidden="true"></span> Minesweeper
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="dailywheel">
+                        <span class="oi oi-aperture" aria-hidden="true"></span> Daily Wheel
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="crash">
+                        <span class="oi	oi-graph" aria-hidden="true"></span> Crash
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="shop">
+                        <span class="oi oi-dollar" aria-hidden="true"></span> Shop
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <LoginLogoutButton />
+                </div>
+            </nav>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-    </nav>
-</div>
+    }
+</AuthorizeView>
 
 @code {
     private bool collapseNavMenu = true;

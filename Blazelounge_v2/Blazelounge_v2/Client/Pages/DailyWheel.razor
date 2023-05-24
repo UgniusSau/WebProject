@@ -1,0 +1,142 @@
+﻿@page "/dailywheel"
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+<AuthorizeView>
+    <Authorized>
+           <EditForm Model="@GameForm" OnValidSubmit="@HandleValidSubmit" Context="editContext">
+            <h1>Daily Lucky Wheel Spin</h1>
+            <div id="wheelContainer">
+                <div  id="arrow" class="decoration">
+                    <img draggable="false" src="images/Arrow.png" />
+                </div>
+                <div style="width:100%" id="wheel" class="decoration @(DoSpinAnimation ? SpinAnimationClass : "")">
+                    <img draggable="false" src="images/Wheel2.png" />
+                </div>
+            </div>
+            <div class="bottomBar">
+                @if (SpinAnimationFinished)
+                {
+                    <p>You won: @SpinResult.Value</p>
+                    <p>Your new balance is: @Math.Round(Balance, 2)</p>
+                }
+                else
+                {
+                    <p>Click the button below to spin the wheel and win a prize!</p>
+                    <div id="playBtn" style="display: flex; justify-content: center; margin: 1rem; flex-grow: 1">
+                        <button disabled="@(!CanSpin)" class="btn btn-primary">Spin!</button>
+                    </div>
+                }
+            </div>
+
+    </EditForm>
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/landing");
+        }
+    </NotAuthorized>
+</AuthorizeView>
+@code {
+    private UniversalGameModel GameForm { get; set; } = new UniversalGameModel();
+    private int? SpinResult;
+    private bool CanSpin = true;
+    private double Balance;
+    private bool DoSpinAnimation { get; set; }
+    private string SpinAnimationClass { get; set; }
+    private bool SpinAnimationFinished { get; set; }
+
+    private void ToggleSpinAnimation()
+    {
+        if (DoSpinAnimation)
+        {
+            DoSpinAnimation = false;
+            SpinAnimationFinished = true;
+        }
+        else
+        {
+            DoSpinAnimation = true;
+        }
+    }
+    /// <summary>
+    /// Initialises spin animation.
+    /// </summary>
+    /// <param name="result">100, 250, 500 or 1000</param>
+    private async void PerformSpinAnimation(int result)
+    {
+        //todo: map
+        switch(result)
+        {
+            case 100:
+                SpinAnimationClass = "one";
+                break;
+            case 200:
+                SpinAnimationClass = "two";
+                break;
+            case 500:
+                SpinAnimationClass = "three";
+                break;
+            case 1000:
+                SpinAnimationClass = "four";
+                break;
+            default:
+                Console.WriteLine("Something went wrong, oops.");
+                break;
+        }
+        DoSpinAnimation = true;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        SpinAnimationFinished = false;
+        await RefreshBalance();
+        await CheckCanSpin();
+        //await base.OnInitializedAsync();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        GameForm.Username = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
+        GameForm.Won = true;
+        GameForm.GameName = "Daily wheel";
+
+        var response = await HttpClient.GetAsync($"http://localhost:7276/api/lucky-wheel/spin?username={GameForm.Username}");
+        if (response.IsSuccessStatusCode)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            SpinResult = int.Parse(content);
+            int spinRes = SpinResult ?? default(int);
+            if(SpinResult != null)
+            {
+                PerformSpinAnimation(spinRes);
+            }
+            StateHasChanged();
+            await Task.Delay(5000);
+            SpinAnimationFinished = true;
+            GameForm.Amount = (SpinResult).ToString();
+            var responseChangeBalance = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge-user/change-balance?game=daily-wheel", GameForm);
+            var updateGameStats = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge/update-user-game-stats", GameForm);
+            await RefreshBalance();
+        }
+    }
+
+    private async Task RefreshBalance()
+    {
+        var userName = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
+        var user = await HttpClient.GetFromJsonAsync<User>($"http://localhost:7276/api/blaze-lounge/user-name/{userName}");
+        Profile profile = await HttpClient.GetFromJsonAsync<Profile>($"http://localhost:7276/api/blaze-lounge-profile/{user.FkProfileidProfile}");
+        Balance = profile.Currency;
+    }
+
+    private async Task CheckCanSpin()
+    {
+        GameForm.Username = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
+        var response = await HttpClient.GetAsync($"http://localhost:7276/api/lucky-wheel/can-spin?username={GameForm.Username}");
+        if (response.IsSuccessStatusCode)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            CanSpin = bool.Parse(content);
+        }
+    }
+
+}

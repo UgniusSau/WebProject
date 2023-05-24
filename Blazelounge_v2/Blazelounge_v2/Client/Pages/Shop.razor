@@ -1,0 +1,73 @@
+﻿@page "/shop"
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http.Json;
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize]
+
+
+@code {
+
+    private async Task<List<Item>> GetShopItems()
+    {
+        var response = await HttpClient.GetAsync("http://localhost:7276/api/blaze-lounge-shop/get-shop-items");
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadFromJsonAsync<List<Item>>();
+            return result;
+        }
+        else
+        {
+            throw new Exception("Failed to fetch items.");
+        }
+    }
+
+    private List<Item> items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        items = await GetShopItems();
+    }
+}
+
+<h3>Shop</h3>
+<AuthorizeView>
+    <Authorized>
+        @if (items != null)
+        {
+            <div id="item-container">
+                @foreach (var item in items)
+                {
+                    string itemInfo = $"Name: {item.Name} Price: {item.Price}\n Description: {item.Description}";
+                    string color = "";
+                    //Cia idealiai reiktu passint spalva per item, bet del demo uzteks ir sitaip
+                    if (item.Description.Split(' ').FirstOrDefault() != null)
+                    {
+                        color = item.Name.Split(' ').FirstOrDefault();
+                        Console.WriteLine(color);
+                    }
+
+                    <div class="shop-item">
+                        <h3>@item.Name</h3>
+                        <div class="display-window">
+                            <div class="bg-circle">
+                            </div>
+                            <span class="oi oi-brush" style="color: @color" aria-hidden="true"></span>
+                        </div>
+                        <span class="desc">@item.Description </span>
+                        <div class="bottom-row">
+                            <p class="price">Price: @item.Price</p>
+                            <NavLink style="color: #F5f1F2; text-decoration: none;" href=@($"buyItem/{item.IdItem}")>Check out &#9655</NavLink>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/landing");
+        }
+    </NotAuthorized>
+</AuthorizeView>

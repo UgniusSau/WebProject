@@ -1,7 +1,21 @@
 ﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
-
+@font-face {
+    font-family: "Fjalla";
+    src: url("../css/open-iconic/font/fonts/Fjalla.ttf") format("truetype");
+}
+@font-face {
+    font-family: "Archive";
+    src: url("../css/open-iconic/font/fonts/Archive.otf") format("opentype");
+}
 html, body {
+    margin: 0;
+    height: 100%;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+#app {
+    height: 100%;
+    background: #2f252E;
 }
 
 h1:focus {
@@ -62,3 +76,33 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+/*Form groups*/
+/*Kazkodel niekur kitur sitas kodas neveikia, tik app.css
+    As irgi nesuprantu, bet geriau neliest, lest viskas sulus
+*/
+
+.form-group {
+    margin-top: 0.75rem;
+}
+
+.form-control {
+    background-color: #2F252E;
+    border: 3px solid #221B22;
+    border-radius: 2rem;
+    outline: none;
+}
+
+    .form-control.valid.modified {
+        outline: none;
+        color: #ED2244;
+    }
+
+    .form-control:focus {
+        background-color: #2F252E;
+        color: #ED2244;
+        border-color: #94283F;
+        box-shadow: none;
+    }
+
+    /*navbar magic*/

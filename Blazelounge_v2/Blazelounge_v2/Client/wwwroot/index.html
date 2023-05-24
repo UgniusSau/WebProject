@@ -1,18 +1,56 @@
 <!DOCTYPE html>
+<style>
+    .loader {
+        border: 16px solid #221b22; /* Light grey */
+        border-top: 16px solid #ed2244; /* Blue */
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 0.5s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
 <html lang="en">
+
+
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Blazelounge_v2</title>
+    <title>BlazeLounge</title>
     <base href="/" />
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
-    <link href="Blazelounge_v2.Client.styles.css" rel="stylesheet" />
+    <link href="BlazeLounge.styles.css" rel="stylesheet" />
+    <script type="text/javascript">
+        function scrollToBottom(textArea) {
+            textArea.scrollTop = textArea.scrollHeight;  
+
+        }
+        function highlightText(divId, highlightedText, color) {
+            var div = document.getElementById(divId);
+            var newText = div.innerHTML.replace(highlightedText, "<span style='color: " + color + "'>" + highlightedText + "</span>");
+            div.innerHTML = newText;
+        }
+    </script>
 </head>
 
-<body>
-    <div id="app">Loading...</div>
+<body >
+    <div id="app" style="background: #221B22">
+        <div class="container " style="display: flex;justify-content:center;align-items:center;height:100%;">
+            <div class="loader"></div>
+        </div>
+
+    </div>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
@@ -21,5 +59,5 @@
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
 </body>
-
 </html>
+

@@ -1,17 +1,182 @@
-﻿@inherits LayoutComponentBase
+﻿@using System.Text.RegularExpressions;
+@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ILocalStorageService LocalStorage
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+@attribute [Authorize]
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<AuthorizeView>
+    <Authorized>
+        <div class="page grid">
+            <div class="logoSpace" role="button" @onclick="OnClickLogo">
+                <div id="bigLogo">
+                    <svg width="3rem" height="100%" viewBox="0 0 267 272" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M89.381 55.4313C89.381 55.4313 83.9023 56.237 85.5137 72.1896C87.125 88.1422 69.3999 126.493 50.7079 150.18C32.016 173.867 -17.2922 231.474 6.23393 265.555C6.23393 265.555 25.2482 243.076 34.5942 235.905C43.9401 228.735 64.888 211.493 70.689 200.455C70.689 200.455 72.9449 203.114 72.6226 210.768C72.6226 210.768 86.8028 216.327 106.139 165.649C106.139 165.649 112.907 170.886 104.85 208.834C104.85 208.834 132.888 190.545 133.21 145.668C133.21 145.668 130.632 113.199 144.168 101.839C144.168 101.839 156.092 167.019 158.992 172.739C161.893 178.46 159.637 184.341 159.637 184.341C159.637 184.341 174.139 148.005 178.973 151.469C178.973 151.469 169.305 212.46 214.424 225.592C214.424 225.592 221.192 229.863 214.424 212.057C210.394 201.116 209.721 189.221 212.49 177.896C212.49 177.896 212.732 201.502 238.272 223.659C263.812 245.815 257.609 272 257.609 272C257.609 272 281.699 225.351 248.585 189.498C215.471 153.645 229.168 93.218 236.983 80.5687C236.983 80.5687 226.59 78.0711 215.068 97.9716C203.547 117.872 187.917 151.872 182.196 88.9479C176.476 26.0237 176.637 22.3175 137.078 0C137.078 0 155.045 29.7299 134.499 68.9668C113.954 108.204 107.428 107.64 107.428 107.64C107.428 107.64 106.462 71.545 89.381 55.4313Z" fill="#ED2244" />
+                    </svg>
+                </div>
+                <div id="logoText">
+                    <a>Blazelounge</a>
+                </div>
+            </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            <div class="topbar">
+                <NavMenu />
+            </div>
+
+            @if (!IsConnected)
+            {
+                <div class="sidebar">
+                    <div class="container">
+                        <button id="connectBtn" class="btn btn-primary" @onclick="Connect">
+                            Connect to chat
+                        </button>
+                    </div>
+                    <div id="chatBar">
+                        <div id="chatBarElement">
+                            <input @bind-value="message"
+                               @bind-value:event="oninput"
+                               @onkeyup="HandleInput"
+                                   class="form-control">
+                            <button id="sendBtn" class="oi oi-eject" aria-hidden="true"
+                                @onclick="Send"
+                                    disabled="@(!IsConnected)">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="sidebar">
+                    <div id="chatTextArea" readonly wrap="soft" style="height: 100%" @ref="TextAreaRef">
+                        @*Cia turbut reiktu padaryt kad butu galima kiekviena message atskirai printint, nes dabar nera budo palaikyt
+                            skirtingas slapyvardziu spalvas. Ar as tai darysiu? ne. sekmes tam kas gaus shopa implementint
+                        *@
+                        @{
+                            // Determine the starting and ending indexes of the messages to display
+                            int startIndex = 0;
+                            int endIndex = messages.Count - 1;
+                            if (messages.Count > 34)
+                            {
+                                startIndex = messages.Count - 34;
+                            }
+
+                            // Display the messages within the starting and ending indexes
+                            for (int i = startIndex; i <= endIndex; i++)
+                            {
+                                var m = messages[i];
+
+                                <span style="color: @m.Item2.Color">@m.Item2.Message</span>
+                                <span style="color: @m.Item1.Color">@m.Item1.Message</span>
+                                <br>
+                            }
+
+                        }
+                    </div>
+                    <div id="chatBar">
+                        <div id="chatBarElement">
+                            <input @bind-value="message"
+                               @bind-value:event="oninput"
+                               @onkeyup="HandleInput"
+                                   class="form-control">
+                            <button id="sendBtn" class="oi oi-eject" aria-hidden="true"
+                                @onclick="Send"
+                                    disabled="@(!IsConnected)">
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            }
+
+            <div class="content">@Body</div>
         </div>
+    </Authorized>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+    <NotAuthorized>
+        @{
+            NavigationManager.NavigateTo("/landing");
+        }
+    </NotAuthorized>
+</AuthorizeView>
+
+
+            
+@code {
+
+    public void OnClickLogo()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private HubConnection? hubConnection;
+    private List<(ChatText, ChatText)> messages = new List<(ChatText, ChatText)>();
+
+    private string username = string.Empty;
+    private string message = string.Empty;
+    ElementReference TextAreaRef;
+    private User userM;
+    private Profile profile;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var loggedInUser = authState.User;
+        username = loggedInUser.Identity?.Name;
+        
+    }
+
+    private async Task Connect()
+    {
+        hubConnection = new HubConnectionBuilder() 
+            .WithUrl("http://localhost:7276/chathub")
+            .Build();
+
+        hubConnection.On<string, string>("ReceiveMessage", async (user, message) =>
+        {
+            userM = await HttpClient.GetFromJsonAsync<User>($"http://localhost:7276/api/blaze-lounge/user-name/{user}");
+            profile = await HttpClient.GetFromJsonAsync<Profile>($"http://localhost:7276/api/blaze-lounge-profile/{userM.FkProfileidProfile}");
+            var msg = $"{message}";
+            ChatText userText = new ChatText(msg + "\n", profile.BaseBgColor);
+            ChatText userUsername = new ChatText(user + ": ", profile.BaseNameColor);
+
+            messages.Add((userText, userUsername));
+            StateHasChanged();
+        });
+
+        await hubConnection.StartAsync();
+        messages.Add((new ChatText("You are now chatting. Say hi!\n", "#FFFFFF"), new ChatText("", "#FFFFFF")));
+    }
+
+
+
+    private async Task Send()
+    {
+        if (hubConnection != null)
+        {
+            await hubConnection.SendAsync("SendMessage", username, message);
+            message = string.Empty;
+        }
+    }
+
+    private async Task HandleInput(KeyboardEventArgs args)
+    {
+        if(args.Key.Equals("Enter"))
+        {
+            await Send();
+        }
+    }
+
+    public bool IsConnected => hubConnection?.State == HubConnectionState.Connected;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection != null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+}

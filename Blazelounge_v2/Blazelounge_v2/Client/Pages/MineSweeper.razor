@@ -1,0 +1,895 @@
+﻿@page "/mine-sweeper"
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Net.Http.Json;
+@inject NavigationManager NavManager
+@inject HttpClient HttpClient
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<AuthorizeView Context="authContext">
+    <Authorized>
+        <div id="gameMineSweeperContainer">
+            @*grid with mines*@
+            <div id="gridContainer">
+                <table>
+                    <tr>
+                        @*Viena sita bloka butu galima padaryt i atskira razor componenta, bet tingiu*@
+                    <td class="flip-card @(btnStateByID[1].isFlipped ? "isFlipped" : "")">
+                        <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[1].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(1)"></button>
+                                @if(btnStateByID[1].isFlipped)
+                                {
+                                    if(btnStateByID[1].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                        </div>
+                    </td>
+                        <td class="flip-card @(btnStateByID[2].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[2].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(2)"></button>
+                                @if (btnStateByID[2].isFlipped)
+                                {
+                                    if (btnStateByID[2].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[3].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[3].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(3)"></button>
+                                @if (btnStateByID[3].isFlipped)
+                                {
+                                    if (btnStateByID[3].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[4].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[4].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(4)"></button>
+                                @if (btnStateByID[4].isFlipped)
+                                {
+                                    if (btnStateByID[4].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[5].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[5].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(5)"></button>
+                                @if (btnStateByID[5].isFlipped)
+                                {
+                                    if (btnStateByID[5].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="flip-card @(btnStateByID[6].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[6].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(6)"></button>
+                                @if (btnStateByID[6].isFlipped)
+                                {
+                                    if (btnStateByID[6].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[7].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[7].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(7)"></button>
+                                @if (btnStateByID[7].isFlipped)
+                                {
+                                    if (btnStateByID[7].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[8].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[8].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(8)"></button>
+                                @if (btnStateByID[8].isFlipped)
+                                {
+                                    if (btnStateByID[8].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[9].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[9].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(9)"></button>
+                                @if (btnStateByID[9].isFlipped)
+                                {
+                                    if (btnStateByID[9].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[10].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[10].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(10)"></button>
+                                @if (btnStateByID[10].isFlipped)
+                                {
+                                    if (btnStateByID[10].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="flip-card @(btnStateByID[11].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[11].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(11)"></button>
+                                @if (btnStateByID[11].isFlipped)
+                                {
+                                    if (btnStateByID[11].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[12].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[12].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(12)"></button>
+                                @if (btnStateByID[12].isFlipped)
+                                {
+                                    if (btnStateByID[12].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[13].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[13].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(13)"></button>
+                                @if (btnStateByID[13].isFlipped)
+                                {
+                                    if (btnStateByID[13].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[14].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[14].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(14)"></button>
+                                @if (btnStateByID[14].isFlipped)
+                                {
+                                    if (btnStateByID[14].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[15].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[15].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(15)"></button>
+                                @if (btnStateByID[15].isFlipped)
+                                {
+                                    if (btnStateByID[15].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="flip-card @(btnStateByID[16].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[16].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(16)"></button>
+                                @if (btnStateByID[16].isFlipped)
+                                {
+                                    if (btnStateByID[16].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[17].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[17].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(17)"></button>
+                                @if (btnStateByID[17].isFlipped)
+                                {
+                                    if (btnStateByID[17].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[18].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[18].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(18)"></button>
+                                @if (btnStateByID[18].isFlipped)
+                                {
+                                    if (btnStateByID[18].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[19].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[19].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(19)"></button>
+                                @if (btnStateByID[19].isFlipped)
+                                {
+                                    if (btnStateByID[19].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[20].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[20].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(20)"></button>
+                                @if (btnStateByID[20].isFlipped)
+                                {
+                                    if (btnStateByID[20].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="flip-card @(btnStateByID[21].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[21].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(21)"></button>
+                                @if (btnStateByID[21].isFlipped)
+                                {
+                                    if (btnStateByID[21].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[22].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[22].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(22)"></button>
+                                @if (btnStateByID[22].isFlipped)
+                                {
+                                    if (btnStateByID[22].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[23].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[23].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(23)"></button>
+                                @if (btnStateByID[23].isFlipped)
+                                {
+                                    if (btnStateByID[23].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[24].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[24].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(24)"></button>
+                                @if (btnStateByID[24].isFlipped)
+                                {
+                                    if (btnStateByID[24].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td class="flip-card @(btnStateByID[25].isFlipped ? "isFlipped" : "")">
+                            <div class="flip-card-inner">
+                                <button disabled="@btnStateByID[25].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(25)"></button>
+                                @if (btnStateByID[25].isFlipped)
+                                {
+                                    if (btnStateByID[25].isMine)
+                                    {
+                                        <div class="flip-card-back flip-card-mine">
+                                            <img style="width: 60%" src="images/mine.png">
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="flip-card-back flip-card-success">
+                                            :D
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div>
+                <EditForm Model="@GameForm" OnValidSubmit="@HandleValidSubmit" Context="editContext">
+                    <div id="rightContainer">
+                        <div id="bettingUI" class="form-group">
+                            <div class="top-row">
+                                @*Cia keiciam betAmount lokaliai ir kiekviena syki updatinam formoj esanti amount*@
+
+                                @*Input box kur galima irasyti bet value, mygtukai salia kurie ji keicia*@
+                                <InputText disabled="@IsBetInputDisabled" style="width:100%; background: #F5F1F210; border: 2px solid #F5F1F2; border-radius: 10px; color: #F5F1F2;" placeholder="Bet amount:" id="mineSweeperAmount" @bind-Value="@x" />
+
+                                @* ERORAI JEIGU NORESI SARAI ISIPLEMENTUOSI
+                                <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => addValueToInput(1)">+1</button>
+                                <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => addValueToInput(10)">+10</button>
+                                <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => addValueToInput(100)">+100</button>
+                                <button class="btn btn-cancel" style="flex-grow:1; min-width: 60px" @onclick="clearValue">x</button>*@
+                            </div>
+                            <button id="startGameBtn" disabled="@IsPlayBtnDisabled" @onclick="onClickPlay" class="btn btn-primary">Start game</button>
+                        </div>
+                    
+                        </div>
+                </EditForm>
+                <div id="cashoutUI">
+                    <p id="winningLabel">Current winning amount:</p>
+                    <p id="winningNumber">@GameForm.Amount</p>
+                    <button id="mineSweeperCashOutBtn" disabled="@IsCashoutBtnDisabled" @onclick="onClickCashout" class="btn btn-primary">Cashout</button>
+                </div>
+            </div>
+
+        </div>
+        @if (!string.IsNullOrEmpty(ErrorMessage) && displayErrorMessage)
+        {
+            <div id="errorMessageCont">
+                <a id="errorMessage">@ErrorMessage</a>
+            </div>
+        }
+        else
+        {
+            <div id="errorMessageCont"></div>
+        }
+    </Authorized>
+    <NotAuthorized>
+        @{
+            NavManager.NavigateTo("/landing");
+        }
+    </NotAuthorized>
+</AuthorizeView>
+
+
+
+@code {
+    private class btnState
+    {
+        public bool isFlipped;
+        public bool isMine;
+        public bool isDisabled;
+
+        public btnState()
+        {
+            isDisabled = true;
+            isFlipped = false;
+            isMine = false;
+        }
+    }
+
+    private UniversalGameModel GameForm { get; set; } = new UniversalGameModel();
+    private string ErrorMessage { get; set; }
+    private bool displayErrorMessage { get; set; }
+    private bool IsPlayBtnDisabled { get; set; }
+    private bool IsPlayBtnClicked { get; set; }
+    private bool IsCashoutBtnDisabled { get; set; }
+    private bool IsBetInputDisabled { get; set; }
+    private bool shouldBeginGame { get; set; }
+    private double betAmount { get; set; }
+    private double beforeGameBetAmount { get; set; }
+    //Array starts at 1 to make it easier with ids
+    private btnState[] btnStateByID { get; set; }
+    private bool isFlipped { get; set; }
+
+
+
+    private bool[,] grid;
+    private int mineCount;
+    private int openTilesCount;
+
+
+    private string x { get; set; }
+
+    //=================================================================================================
+    //=================================================================================================
+    //=================================================================================================
+    protected override void OnInitialized()
+    {
+        EnablePlayButton();
+        DisableCashoutButton();
+        PlayButtonNotClicked();
+        EnableBetInputBtn();
+        //Cia turbut galetu but ne for loopas bet veikia tai nekeisiu
+        btnStateByID = new btnState[26];
+        for (int i = 0; i < 26; i++)
+        {
+            btnStateByID[i] = new btnState();
+        }
+
+        base.OnInitialized();
+    }
+
+    private void Regenerate()
+    {
+        mineCount = 0;
+        openTilesCount = 0;
+        grid = new bool[5, 5];
+
+        for (int i = 0; i < 26; i++)
+        {
+            btnStateByID[i] = new btnState();
+        }
+
+        Random random = new Random();
+
+        while (mineCount < 6)
+        {
+            int x = random.Next(0, 5);
+            int y = random.Next(0, 5);
+            if (!grid[x, y])
+            {
+                grid[x, y] = true;
+                mineCount++;
+            }
+        }
+
+        if (IsPlayBtnClicked == true)
+        {
+            Console.WriteLine("Mines:");
+            for (int i = 0; i < 5; i++)
+            {
+                for (int j = 0; j < 5; j++)
+                {
+                    if (grid[i, j])
+                    {
+                        int buttonId = (i * 5) + j + 1;
+                        btnStateByID[buttonId].isMine = true;
+                        Console.WriteLine($"Mine at button {buttonId} (index {i},{j})");
+                    }
+                }
+            }
+        }
+
+    }
+
+    private async void ButtonClicked(int buttonId)
+    {
+        if(!btnStateByID[buttonId].isFlipped)
+        {
+            btnStateByID[buttonId].isFlipped = true;
+        }
+
+        //Handle each tile click
+        Console.WriteLine($"Button clicked {buttonId}");
+        int row = (buttonId - 1) / 5;
+        int col = (buttonId - 1) % 5;
+
+        if (grid[row, col])
+        {
+            Console.WriteLine("You lost!");
+            GameForm.Won = false;
+            GameForm.Amount = beforeGameBetAmount.ToString();
+            GameForm.GameName = "Minesweeper";
+            ErrorMessage = string.Format("You lost! Amount: {0}. Your new balance: ", Math.Round(double.Parse(GameForm.Amount), 2));
+            var response = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge-user/change-balance", GameForm);
+            var updateGameStats = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge/update-user-game-stats", GameForm);
+            if (!updateGameStats.IsSuccessStatusCode)
+                        ErrorMessage += "Error occured while updating statistics\n";
+            if (response.IsSuccessStatusCode)
+            {
+                ErrorMessage += "\n" + await response.Content.ReadAsStringAsync();
+                displayErrorMessage = true;
+                EnablePlayButton();
+                DisableCashoutButton();
+                PlayButtonNotClicked();
+                EnableBetInputBtn();
+                DisableGridButtons();
+                StateHasChanged();
+            }
+        }
+        else
+        {
+            Console.WriteLine($"game form curr amount: {GameForm.Amount}");
+            openTilesCount++;
+
+            var currAmount = double.Parse(GameForm.Amount);
+            Console.WriteLine($" curr amount: {currAmount}");
+
+            var newAmmount = currAmount + (5 * openTilesCount);
+            Console.WriteLine($" new amount: {newAmmount}");
+
+            GameForm.Amount = newAmmount.ToString();
+            Console.WriteLine($"updated wining: {GameForm.Amount}");
+
+            //ErrorMessage = string.Format("Potential winnings amount: {0}. ", 2 * double.Parse(GameForm.Amount));
+            //displayErrorMessage = true;
+        }
+    } 
+
+    //========================================================================================
+    //========================================================================================
+    //========================================================================================
+    private void PlayButtonNotClicked()
+    {
+        IsPlayBtnClicked = false;
+    }
+
+    private void PlayButtonClicked()
+    {
+        IsPlayBtnClicked = true;
+    }
+
+    private void DisablePlayButton()
+    {
+        IsPlayBtnDisabled = true;
+    }
+
+    private void EnablePlayButton()
+    {
+        IsPlayBtnDisabled = false;
+    }
+
+    private void DisableCashoutButton()
+    {
+        IsCashoutBtnDisabled = true;
+    }
+
+    private void EnableCashoutButton()
+    {
+        IsCashoutBtnDisabled = false;
+    }
+
+    private void DisableBetInputBtn()
+    {
+        IsBetInputDisabled = true;
+    }
+
+    private void EnableBetInputBtn()
+    {
+        IsBetInputDisabled = false;
+    }
+
+    private void EnableGridButtons()
+    {
+        for(int i = 0; i <= 25; i++)
+        {
+            btnStateByID[i].isDisabled = false;
+        }
+    }
+    private void DisableGridButtons()
+    {
+        for (int i = 0; i <= 25; i++)
+        {
+            btnStateByID[i].isDisabled = true;
+        }
+        StateHasChanged();
+    }
+
+    private void addValueToInput(int value)
+    {
+        betAmount += value;
+        updateGameformBetValue();
+    }
+
+    private void clearValue()
+    {
+        betAmount = 0;
+        updateGameformBetValue();
+    }
+
+    private void updateGameformBetValue()
+    {
+        GameForm.Amount = Convert.ToString(betAmount);
+    }
+
+    private void allowGameToBegin()
+    {
+        shouldBeginGame = true;
+    }
+
+    private async void onClickPlay()
+    {
+        PlayButtonClicked();
+        await HandleValidSubmit();
+        Console.WriteLine(shouldBeginGame);
+        if (shouldBeginGame == true)
+        {
+            Regenerate();
+            DisablePlayButton();
+            DisableBetInputBtn();
+            EnableCashoutButton();
+            EnableGridButtons();
+            displayErrorMessage = false;
+        }
+        else
+        {
+            DisableCashoutButton();
+            PlayButtonNotClicked();
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        GameForm.Amount = x;
+        displayErrorMessage = false;
+        GameForm.Username = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
+        try
+        {
+            var sufficientBalance = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge-user/check-balance", GameForm);
+            if (sufficientBalance.IsSuccessStatusCode && Convert.ToDouble(GameForm.Amount) > 0)
+            {
+                beforeGameBetAmount = double.Parse(GameForm.Amount);
+                allowGameToBegin();
+                StateHasChanged();
+            }
+            else
+            {
+                ErrorMessage = "Invalid bet!";
+                displayErrorMessage = true;
+                EnablePlayButton();
+                PlayButtonNotClicked();
+                DisableCashoutButton();
+                StateHasChanged();
+            }
+        }
+
+        catch (Exception ex)
+        {
+            ErrorMessage = "Error occurred while checking balance: " + ex.Message;
+            displayErrorMessage = true;
+            EnablePlayButton();
+            StateHasChanged();
+        }
+        x = null;
+        return;
+    }
+
+    private async Task onClickCashout()
+    {
+        GameForm.Won = true;
+        GameForm.GameName = "Minesweeper";
+        // use same endpoint which doubles ammount so devide it
+        var updateGameStats = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge/update-user-game-stats", GameForm);
+        if (!updateGameStats.IsSuccessStatusCode)
+            ErrorMessage += "Error occured while updating statistics";
+        var response = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge-user/change-balance?game=mine-sweeper", GameForm);
+        if (response.IsSuccessStatusCode)
+        {
+            ErrorMessage = string.Format("You won! Amount: {0}. Your current balance: ", double.Parse(GameForm.Amount));
+            ErrorMessage += "\n" + await response.Content.ReadAsStringAsync();
+            displayErrorMessage = true;
+            EnablePlayButton();
+            EnableBetInputBtn();
+            DisableCashoutButton();
+            PlayButtonNotClicked();
+            DisableGridButtons();
+            shouldBeginGame = false;
+            StateHasChanged();
+        }
+        return;
+    }
+
+}

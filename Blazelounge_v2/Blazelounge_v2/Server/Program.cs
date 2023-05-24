@@ -56,17 +56,17 @@ builder.Services.AddDbContext<DbContext2>(options =>
 });
 
 // Add Cors
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowAllOrigins",
-//        builder => builder.AllowAnyOrigin()
-//                          .AllowAnyMethod()
-//                          .AllowAnyHeader()
-//                          .WithExposedHeaders("content-disposition") // Add this line
-//                          .WithExposedHeaders("content-type") // Add this line
-//                          .WithExposedHeaders("X-Pagination") // Add this line
-//                          .WithExposedHeaders("X-Total-Count")); // Add this line
-//});
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder => builder.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .WithExposedHeaders("content-disposition") // Add this line
+                          .WithExposedHeaders("content-type") // Add this line
+                          .WithExposedHeaders("X-Pagination") // Add this line
+                          .WithExposedHeaders("X-Total-Count")); // Add this line
+});
 
 var app = builder.Build();
 
@@ -80,7 +80,7 @@ app.MapHub<CrashHub>("/crashhub");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    //app.UseCors(options => options.AllowAnyOrigin());
+    app.UseCors(options => options.AllowAnyOrigin());
     app.UseWebAssemblyDebugging();
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
@@ -96,6 +96,7 @@ else
     app.UseHsts();
 }
 
+app.UseCors("AllowAllOrigins");
 app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();

@@ -1,0 +1,190 @@
+﻿body {
+    margin: 0;
+    padding: 0;
+}
+.decoration {
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+}
+
+#wheel > img {
+    width: 500px;
+    transform: scale(1.1)
+}
+#content {
+    margin: 0;
+    padding: 0;
+}
+
+.bottomBar {
+    position: absolute;
+    bottom: 0;
+}
+
+h1 {
+    margin-top: 0;
+    padding: 0;
+    text-align: center;
+    font-family: Archive;
+}
+
+p {
+    font-family: Archive;
+    text-align: center;
+}
+
+#wheelContainer {
+    position:relative;
+    padding-top: 50px;
+}
+
+#arrow {
+    position: absolute;
+    left: 200px;
+    top: -10px;
+    z-index: 5;
+}
+
+#wheel.one {
+    z-index: -1;
+    -webkit-animation: outcomeOne 5s ease-out forwards;
+    -moz-animation: outcomeOne 5s ease-out forwards;
+    -o-animation: outcomeOne 5s ease-out forwards;
+    animation: outcomeOne 5s ease-out forwards;
+}
+
+#wheel.two {
+    z-index: -1;
+    -webkit-animation: outcomeTwo 5s ease-out forwards;
+    -moz-animation: outcomeTwo 5s ease-out forwards;
+    -o-animation: outcomeTwo 5s ease-out forwards;
+    animation: outcomeTwo 5s ease-out forwards;
+}
+#wheel.three {
+    z-index: -1;
+    -webkit-animation: outcomeThree 5s ease-out forwards;
+    -moz-animation: outcomeThree 5s ease-out forwards;
+    -o-animation: outcomeThree 5s ease-out forwards;
+    animation: outcomeThree 5s ease-out forwards;
+}
+#wheel.four {
+    z-index: -1;
+    -webkit-animation: outcomeFour 5s ease-out forwards;
+    -moz-animation: outcomeFour 5s ease-out forwards;
+    -o-animation: outcomeFour 5s ease-out forwards;
+    animation: outcomeFour 5s ease-out forwards;
+}
+
+@-webkit-keyframes outcomeOne {
+    from {
+        -webkit-transform: rotateZ(0);
+        -moz-transform: rotateZ(0);
+        transform: rotateZ(0);
+    }
+
+    to {
+        -webkit-transform: rotateZ(2000deg);
+        -moz-transform: rotateZ(2000deg);
+        transform: rotateZ(2000deg);
+    }
+}
+
+@-webkit-keyframes outcomeTwo {
+    from {
+        -webkit-transform: rotateZ(0);
+        -moz-transform: rotateZ(0);
+        transform: rotateZ(0);
+    }
+
+    to {
+        -webkit-transform: rotateZ(1954deg);
+        -moz-transform: rotateZ(1954deg);
+        transform: rotateZ(1954deg);
+    }
+}
+
+@-webkit-keyframes outcomeThree {
+    from {
+        -webkit-transform: rotateZ(0);
+        -moz-transform: rotateZ(0);
+        transform: rotateZ(0);
+    }
+
+    to {
+        -webkit-transform: rotateZ(2050deg);
+        -moz-transform: rotateZ(2050deg);
+        transform: rotateZ(2050deg);
+    }
+}
+
+@-webkit-keyframes outcomeFour {
+    from {
+        -webkit-transform: rotateZ(0);
+        -moz-transform: rotateZ(0);
+        transform: rotateZ(0);
+    }
+
+    to {
+        -webkit-transform: rotateZ(2120deg);
+        -moz-transform: rotateZ(2120deg);
+        transform: rotateZ(2120deg);
+    }
+}
+
+/*Button stuff*/
+.btn {
+    height: 3rem;
+    width: 10rem;
+    border-radius: 10px;
+    font-size: 1rem;
+}
+
+    .btn:focus {
+        outline: 0;
+        box-shadow: 0 0 0 .1rem rgba(237, 34, 68, 0.3);
+    }
+
+    .btn:active {
+        animation: clicky-button 0.05s linear both;
+    }
+
+.btn-primary {
+    color: #F5F1F2;
+    background: rgba(237, 34, 68, 1);
+    border: 0px solid #ED2244;
+    width: 100%;
+    height: 100%;
+}
+
+    .btn-primary:hover {
+        background: rgba(237, 34, 68, 0.6);
+    }
+
+.btn-outline-primary {
+    color: #ED2244;
+    border: 4px solid;
+    border-color: #ED2244;
+    background: transparent;
+}
+
+    .btn-outline-primary:hover {
+        color: rgba(245, 241, 242, 0.8);
+        background: rgba(237, 34, 68, 0.1);
+    }
+
+@-webkit-keyframes clicky-button {
+    0% {
+        transform: scale(1)
+    }
+
+    50% {
+        transform: scale(.95)
+    }
+
+    100% {
+        transform: scale(1)
+    }
+}
