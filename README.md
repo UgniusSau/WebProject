@@ -11,3 +11,10 @@ Technologies used:
 • Sqlite3
 
 • HTML + CSS + JavaScript
+
+DEMO:
+
+https://github.com/UgniusSau/WebProject/assets/99269208/ce7c1cf6-0571-4030-a8eb-fc869bb91108
+
+https://github.com/UgniusSau/WebProject/assets/99269208/c5a908be-df22-4dfc-b2cd-b33d13ac834d
+
