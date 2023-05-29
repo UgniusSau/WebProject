@@ -99,7 +99,7 @@
         GameForm.Won = true;
         GameForm.GameName = "Daily wheel";
 
-        var response = await HttpClient.GetAsync($"http://localhost:7276/api/lucky-wheel/spin?username={GameForm.Username}");
+        var response = await HttpClient.GetAsync($"https://localhost:7276/api/lucky-wheel/spin?username={GameForm.Username}");
         if (response.IsSuccessStatusCode)
         {
             var content = await response.Content.ReadAsStringAsync();
@@ -113,8 +113,8 @@
             await Task.Delay(5000);
             SpinAnimationFinished = true;
             GameForm.Amount = (SpinResult).ToString();
-            var responseChangeBalance = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge-user/change-balance?game=daily-wheel", GameForm);
-            var updateGameStats = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge/update-user-game-stats", GameForm);
+            var responseChangeBalance = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"https://localhost:7276/api/blaze-lounge-user/change-balance?game=daily-wheel", GameForm);
+            var updateGameStats = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"https://localhost:7276/api/blaze-lounge/update-user-game-stats", GameForm);
             await RefreshBalance();
         }
     }
@@ -122,15 +122,15 @@
     private async Task RefreshBalance()
     {
         var userName = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
-        var user = await HttpClient.GetFromJsonAsync<User>($"http://localhost:7276/api/blaze-lounge/user-name/{userName}");
-        Profile profile = await HttpClient.GetFromJsonAsync<Profile>($"http://localhost:7276/api/blaze-lounge-profile/{user.FkProfileidProfile}");
+        var user = await HttpClient.GetFromJsonAsync<User>($"https://localhost:7276/api/blaze-lounge/user-name/{userName}");
+        Profile profile = await HttpClient.GetFromJsonAsync<Profile>($"https://localhost:7276/api/blaze-lounge-profile/{user.FkProfileidProfile}");
         Balance = profile.Currency;
     }
 
     private async Task CheckCanSpin()
     {
         GameForm.Username = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
-        var response = await HttpClient.GetAsync($"http://localhost:7276/api/lucky-wheel/can-spin?username={GameForm.Username}");
+        var response = await HttpClient.GetAsync($"https://localhost:7276/api/lucky-wheel/can-spin?username={GameForm.Username}");
         if (response.IsSuccessStatusCode)
         {
             var content = await response.Content.ReadAsStringAsync();

@@ -49,7 +49,7 @@
         ChangePasswordForm.Username = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
         try
         {
-            var response = await HttpClient.PostAsJsonAsync<ChangePasswordModel>($"http://localhost:7276/api/blaze-lounge-user/change-pass", ChangePasswordForm);
+            var response = await HttpClient.PostAsJsonAsync<ChangePasswordModel>($"https://localhost:7276/api/blaze-lounge-user/change-pass", ChangePasswordForm);
             if (response.IsSuccessStatusCode)
             {
                 // aš nenoriu naudot error message kaip būdo perduot ne errorus

@@ -689,8 +689,8 @@
             GameForm.Amount = beforeGameBetAmount.ToString();
             GameForm.GameName = "Minesweeper";
             ErrorMessage = string.Format("You lost! Amount: {0}. Your new balance: ", Math.Round(double.Parse(GameForm.Amount), 2));
-            var response = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge-user/change-balance", GameForm);
-            var updateGameStats = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge/update-user-game-stats", GameForm);
+            var response = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"https://localhost:7276/api/blaze-lounge-user/change-balance", GameForm);
+            var updateGameStats = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"https://localhost:7276/api/blaze-lounge/update-user-game-stats", GameForm);
             if (!updateGameStats.IsSuccessStatusCode)
                         ErrorMessage += "Error occured while updating statistics\n";
             if (response.IsSuccessStatusCode)
@@ -832,7 +832,7 @@
         GameForm.Username = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
         try
         {
-            var sufficientBalance = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge-user/check-balance", GameForm);
+            var sufficientBalance = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"https://localhost:7276/api/blaze-lounge-user/check-balance", GameForm);
             if (sufficientBalance.IsSuccessStatusCode && Convert.ToDouble(GameForm.Amount) > 0)
             {
                 beforeGameBetAmount = double.Parse(GameForm.Amount);
@@ -865,10 +865,10 @@
     {
         GameForm.Won = true;
         GameForm.GameName = "Minesweeper";
-        var updateGameStats = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge/update-user-game-stats", GameForm);
+        var updateGameStats = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"https://localhost:7276/api/blaze-lounge/update-user-game-stats", GameForm);
         if (!updateGameStats.IsSuccessStatusCode)
             ErrorMessage += "Error occured while updating statistics";
-        var response = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge-user/change-balance?game=mine-sweeper", GameForm);
+        var response = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"https://localhost:7276/api/blaze-lounge-user/change-balance?game=mine-sweeper", GameForm);
         if (response.IsSuccessStatusCode)
         {
             ErrorMessage = string.Format("You won! Amount: {0}. Your current balance: ", double.Parse(GameForm.Amount));

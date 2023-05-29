@@ -66,7 +66,7 @@
 
         try
         {
-            var response = await HttpClient.PostAsJsonAsync<RegisterModel>("http://localhost:7276/api/blaze-lounge-user/register", RegisterForm);
+            var response = await HttpClient.PostAsJsonAsync<RegisterModel>("https://localhost:7276/api/blaze-lounge-user/register", RegisterForm);
             if (response.IsSuccessStatusCode)
             {
                 CancelEventCallback.InvokeAsync();

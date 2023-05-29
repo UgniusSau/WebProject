@@ -11,7 +11,7 @@
 
     private async Task<List<Item>> GetShopItems()
     {
-        var response = await HttpClient.GetAsync("http://localhost:7276/api/blaze-lounge-shop/get-shop-items");
+        var response = await HttpClient.GetAsync("https://localhost:7276/api/blaze-lounge-shop/get-shop-items");
         if (response.IsSuccessStatusCode)
         {
             var result = await response.Content.ReadFromJsonAsync<List<Item>>();
