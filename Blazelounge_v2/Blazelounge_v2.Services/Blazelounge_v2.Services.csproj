@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.30.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Blazelounge_v2.Data\Blazelounge_v2.Data.csproj" />
     <ProjectReference Include="..\Blazelounge_v2.Repositories\Blazelounge_v2.Repositories.csproj" />
   </ItemGroup>

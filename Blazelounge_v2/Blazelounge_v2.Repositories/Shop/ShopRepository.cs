@@ -47,7 +47,6 @@ namespace Blazelounge_v2.Repositories
                         await _context.SaveChangesAsync();
                     }
 
-
                     var invItem = await _context.InventoryItems.SingleOrDefaultAsync(it => it.FkInventoryidInventory == inventory.IdInventory && it.FkItemidItem == item.IdItem);
 
                     if (invItem == null)

@@ -1,5 +1,9 @@
 ﻿using Blazelounge_v2.Data.Models;
 using Blazelounge_v2.Repositories;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+
 
 namespace Blazelounge_v2.Services
 {
@@ -7,14 +11,15 @@ namespace Blazelounge_v2.Services
     {
         private readonly IUserRepository _UserRepository;
 
+
         public UserService(IUserRepository dBUserRepository)
         {
             _UserRepository = dBUserRepository;
         }
 
-        public IQueryable<User> GetUsersDB()
+        public IQueryable<User> GetUsers()
         {
-            return _UserRepository.GetUsersDB();
+            return _UserRepository.GetUsers();
         }
 
         public async Task<User> GetUserByUUID(string uuid)
@@ -22,14 +27,55 @@ namespace Blazelounge_v2.Services
             return await _UserRepository.GetUserByUUID(uuid);
         }
 
-        public async Task AddUserDB(User user)
+        public async Task AddUser(RegisterModel registerModel)
         {
+            string password = registerModel.Password;
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+
+            var user = new User
+            {
+                Username = registerModel.Username,
+                Email = registerModel.Email,
+                PasswordHashed = hashedPassword,
+                Uuid = Guid.NewGuid().ToString(),
+                FirstName = registerModel.First_Name,
+                LastName = registerModel.Last_Name
+            };
+
             await _UserRepository.AddUserDB(user);
         }
 
-        public async Task<bool> AuthenticateUserDB(string username, string password)
+        public async Task<string?> AuthenticateUser(LoginModel loginModel, string tokenKey)
         {
-            return await _UserRepository.AuthenticateUserDB(username, password);
+            
+            if(await _UserRepository.AuthenticateUser(loginModel.Username, loginModel.Password))
+            {
+                string token = CreateToken(loginModel, tokenKey);
+                return token;
+            }
+
+            return null;
+        }
+
+        private string CreateToken(LoginModel loginModel, string tokenKey)
+        {
+            List<Claim> claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, loginModel.Username)
+            };
+
+            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(tokenKey));
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.Now.AddDays(1),
+                signingCredentials: creds);
+
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return jwt;
         }
 
         public async Task<User> GetUserByName(string username)
@@ -42,20 +88,33 @@ namespace Blazelounge_v2.Services
             return await _UserRepository.GetUserProfile(id);
         }
 
-        public async Task<bool> ChangePasswordDB(ChangePasswordModel changePasswordModel)
+        public async Task<bool> ChangePassword(ChangePasswordModel changePasswordModel)
         {
-            return await _UserRepository.ChangePasswordDB(changePasswordModel);
+            string hashedNewPassword = BCrypt.Net.BCrypt.HashPassword(changePasswordModel.NewPassword);
+            changePasswordModel.NewPassword = hashedNewPassword;
+
+            return await _UserRepository.ChangePassword(changePasswordModel);
         }
 
-		public async Task<bool> ChangeBalance(string username, bool addBalance, double amount, string? game)
+		public async Task<string?> ChangeBalance(UniversalGameModel gameModel, string? game)
 		{
-			return await _UserRepository.ChangeBalance(username, addBalance, amount, game);
+            string wholeNumber = gameModel.Amount.Split('.')[0];
+            
+            if(await _UserRepository.ChangeBalance(gameModel.Username, gameModel.Won, double.Parse(wholeNumber), game))
+            {
+                var user = await GetUserByName(gameModel.Username);
+                var profile = await GetUserProfile(user.FkProfileidProfile.ToString());
+                return profile.Currency.ToString();
+            }
+
+            return null;
 		}
 
-		public async Task<bool> CheckBalance(string username, double amount)
+		public async Task<bool> CheckBalance(UniversalGameModel gameModel)
 		{
-			return await _UserRepository.CheckBalance(username, amount);
+			return await _UserRepository.CheckBalance(gameModel.Username, Double.Parse(gameModel.Amount));
 		}
+
         public Task<IQueryable<Item>> GetUserItems(string username)
         {
             return _UserRepository.GetUserItems(username);
@@ -67,9 +126,27 @@ namespace Blazelounge_v2.Services
         }
     
 
-        public async Task<DateTime?> GetSpinTime(string username)
+        public async Task<int> GetSpinTime(string username)
         {
-            return await _UserRepository.GetSpinTime(username);
+            DateTime? lastSpin = await _UserRepository.GetSpinTime(username);
+
+            List<int> values = new List<int>() { 100, 200, 500, 1000 };
+
+            if (lastSpin == null)
+            {
+                await UpdateSpin(username);
+                return values[Random.Shared.Next(values.Count)];
+            }
+            else
+            {
+                if (DateTime.UtcNow - lastSpin >= TimeSpan.FromHours(24))
+                {
+                    await UpdateSpin(username);
+                    return values[Random.Shared.Next(values.Count)];
+                }
+            }
+
+            return 0;
         }
 
         public async Task<bool> UpdateSpin(string username)
@@ -82,9 +159,10 @@ namespace Blazelounge_v2.Services
             return await _UserRepository.GetUserGamesStats(username);
         }
 
-        public async Task<bool> UpdateUserGamesStats(string username, string gameName, bool won, double amount)
+        public async Task<bool> UpdateUserGamesStats(UniversalGameModel model)
         {
-            return await _UserRepository.UpdateUserGamesStats(username, gameName, won, amount);
+            string wholeNumber = model.Amount.Split('.')[0];
+            return await _UserRepository.UpdateUserGamesStats(model.Username, model.GameName, model.Won, double.Parse(wholeNumber));
         }
     }
 }

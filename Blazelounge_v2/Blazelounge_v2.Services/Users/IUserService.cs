@@ -4,24 +4,21 @@ namespace Blazelounge_v2.Services
 {
     public interface IUserService
     {
-        //user ===================================================================
-        IQueryable<User> GetUsersDB();
+        IQueryable<User> GetUsers();
         Task<User> GetUserByUUID(string uuid);
         Task<User> GetUserByName(string username);
-        Task AddUserDB(User user);
-        Task<bool> AuthenticateUserDB(string username, string password);
-
-        //profile ===============================================================
+        Task AddUser(RegisterModel registerModel);
+        Task<string?> AuthenticateUser(LoginModel loginModel, string tokenKey);
         Task<Profile> GetUserProfile(string id);
-        Task<bool> ChangePasswordDB(ChangePasswordModel changePasswordModel);
-        Task<bool> ChangeBalance(string username, bool addBalance, double amount, string? game);
-        Task<bool> CheckBalance(string username, double amount);
+        Task<bool> ChangePassword(ChangePasswordModel changePasswordModel);
+        Task<string?> ChangeBalance(UniversalGameModel gameModel, string? game);
+        Task<bool> CheckBalance(UniversalGameModel gameModel);
         Task<IQueryable<Item>> GetUserItems(string username);
         Task<bool> ChangeUserColor(string username, Item item);
-        Task<DateTime?> GetSpinTime(string username);
+        Task<int> GetSpinTime(string username);
         Task<bool> UpdateSpin(string username);
         Task<IQueryable<GamesStat>> GetUserGamesStats(string username);
-        Task<bool> UpdateUserGamesStats(string username, string gameName, bool won, double amount);
+        Task<bool> UpdateUserGamesStats(UniversalGameModel model);
 
     }
 }

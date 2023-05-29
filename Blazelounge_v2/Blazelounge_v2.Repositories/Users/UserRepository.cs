@@ -13,7 +13,7 @@ namespace Blazelounge_v2.Repositories
         }
 
         // user ======================================================================
-        public IQueryable<User> GetUsersDB()
+        public IQueryable<User> GetUsers()
         {
             return _context.Users;
         }
@@ -52,7 +52,7 @@ namespace Blazelounge_v2.Repositories
 
         }
 
-        public async Task<bool> AuthenticateUserDB(string username, string password)
+        public async Task<bool> AuthenticateUser(string username, string password)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
 
@@ -77,7 +77,7 @@ namespace Blazelounge_v2.Repositories
             return await _context.Profiles.SingleOrDefaultAsync(p => p.IdProfile == long.Parse(id));
         }
 
-        public async Task<bool> ChangePasswordDB(ChangePasswordModel changePasswordModel)
+        public async Task<bool> ChangePassword(ChangePasswordModel changePasswordModel)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == changePasswordModel.Username);
             if (user != null)

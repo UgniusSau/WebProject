@@ -52,9 +52,6 @@
             {
                 <div class="sidebar">
                     <div id="chatTextArea" readonly wrap="soft" style="height: 100%" @ref="TextAreaRef">
-                        @*Cia turbut reiktu padaryt kad butu galima kiekviena message atskirai printint, nes dabar nera budo palaikyt
-                            skirtingas slapyvardziu spalvas. Ar as tai darysiu? ne. sekmes tam kas gaus shopa implementint
-                        *@
                         @{
                             // Determine the starting and ending indexes of the messages to display
                             int startIndex = 0;
@@ -132,13 +129,13 @@
     private async Task Connect()
     {
         hubConnection = new HubConnectionBuilder() 
-            .WithUrl("http://localhost:7276/chathub")
+            .WithUrl("https://localhost:7276/chathub")
             .Build();
 
         hubConnection.On<string, string>("ReceiveMessage", async (user, message) =>
         {
-            userM = await HttpClient.GetFromJsonAsync<User>($"http://localhost:7276/api/blaze-lounge/user-name/{user}");
-            profile = await HttpClient.GetFromJsonAsync<Profile>($"http://localhost:7276/api/blaze-lounge-profile/{userM.FkProfileidProfile}");
+            userM = await HttpClient.GetFromJsonAsync<User>($"https://localhost:7276/api/blaze-lounge/user-name/{user}");
+            profile = await HttpClient.GetFromJsonAsync<Profile>($"https://localhost:7276/api/blaze-lounge-profile/{userM.FkProfileidProfile}");
             var msg = $"{message}";
             ChatText userText = new ChatText(msg + "\n", profile.BaseBgColor);
             ChatText userUsername = new ChatText(user + ": ", profile.BaseNameColor);

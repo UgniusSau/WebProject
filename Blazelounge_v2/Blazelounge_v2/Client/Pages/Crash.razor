@@ -97,37 +97,6 @@
                             </div>
                         }
                     </div>
-                    //Delete this part once bet selection buttons are done
-                    //if(gameState.CurrentStage == CrashGameState.Stage.BETTING)
-                    //{
-                    //    <EditForm Model="@GameForm" OnValidSubmit="@HandleValidSubmit" Context="editContext">
-                    //    <div class="form-group">
-                    //        <div class="top-row">
-                    //            <InputText  style="flex-grow:3; background: #F5F1F210; border: 2px solid #F5F1F2; border-radius: 10px; color: #F5F1F2;" placeholder="Bet amount:" id="amount" @bind-Value="@GameForm.Amount" />
-                    //            <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => AddValueToInput(1)">+1</button>
-                    //            <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => AddValueToInput(10)">+10</button>
-                    //            <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => AddValueToInput(100)">+100</button>
-                    //            <button class="btn btn-cancel" style="flex-grow:1; min-width: 60px" @onclick="ClearValue">x</button>
-                    //        </div>
-                    //    </div>
-                    //    <div id="bottomRow">
-                    //        <div id="playBtn" style="display: flex; justify-content: center; margin: 1rem; flex-grow: 1">
-                    //            <button disabled="@BetLockedIn" @onclick="OnClickPlay" class="btn btn-primary">Play</button>
-                    //        </div>
-                    //    </div>
-                    //    </EditForm>
-                    //} 
-                    //else if (gameState.CurrentStage == CrashGameState.Stage.IN_PROGRESS)
-                    //{
-                    //    if (BetLockedIn)
-                    //    {
-                    //        <div id="bottomRow">
-                    //             <div id="cashBtn" style="display: flex; justify-content: center; margin: 1rem;">
-                    //                <button disabled="@CashedOut" @onclick="OnClickCashout" class="btn btn-primary">Cash out</button>
-                    //            </div>
-                    //        </div>
-                    //    }
-                    //}
                 }
             }
         }
@@ -202,7 +171,7 @@
     private async Task Connect()
     {
         crashConnection = new HubConnectionBuilder()
-            .WithUrl("http://localhost:7276/crashhub")
+            .WithUrl("https://localhost:7276/crashhub")
             .Build();
 
 
@@ -214,7 +183,6 @@
             {
                 MultiplierDisplayMsg = String.Format("Place your bets. A new game is starting in: {0}", gameState.Countdown.Seconds);
             }
-            //StateHasChanged();
         });
 
         // Sitas eventas kvieciamas kiekviena karta kai pasikeicia zaidimo busena
@@ -264,7 +232,7 @@
                             GameForm.Amount = BetAmount.ToString("#.##");
                             GameForm.Won = true;
                             GameForm.GameName = "Crash";
-                            var updateGameStats = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge/update-user-game-stats", GameForm);
+                            var updateGameStats = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"https://localhost:7276/api/blaze-lounge/update-user-game-stats", GameForm);
                             if (!updateGameStats.IsSuccessStatusCode)
                                 ErrorMessage += "Error occured while updating statistics\n";
                         }
@@ -274,7 +242,7 @@
                             GameForm.Amount = BetAmount.ToString("#.##");
                             GameForm.Won = false;
                             GameForm.GameName = "Crash";
-                            var updateGameStats = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge/update-user-game-stats", GameForm);
+                            var updateGameStats = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"https://localhost:7276/api/blaze-lounge/update-user-game-stats", GameForm);
                             if (!updateGameStats.IsSuccessStatusCode)
                                 ErrorMessage += "Error occured while updating statistics\n";
                         }
@@ -295,11 +263,9 @@
         if (BetLockedIn && !CashedOut)
         {
             GameForm.Username = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
-            // kuris gameform amount sugalvojo string padaryt :skull:
-            // :D :D :D :D
             GameForm.Amount = (BetAmount * gameState.CrashValue).ToString("#.##");
             GameForm.Won = true;
-            var response = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge-user/change-balance", GameForm);
+            var response = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"https://localhost:7276/api/blaze-lounge-user/change-balance", GameForm);
             if (response.IsSuccessStatusCode)
             {
                 BetAmount = Math.Round(double.Parse(GameForm.Amount), 2);
@@ -315,11 +281,11 @@
     private async Task OnClickPlay()
     {
         GameForm.Username = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
-        var sufficientBalance = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge-user/check-balance", GameForm);
+        var sufficientBalance = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"https://localhost:7276/api/blaze-lounge-user/check-balance", GameForm);
         if (sufficientBalance.IsSuccessStatusCode && Convert.ToDouble(GameForm.Amount) > 0)
         {
             GameForm.Won = false;
-            var response = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge-user/change-balance", GameForm);
+            var response = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"https://localhost:7276/api/blaze-lounge-user/change-balance", GameForm);
             if (response.IsSuccessStatusCode)
             {
                 BetAmount = double.Parse(GameForm.Amount);
@@ -337,10 +303,6 @@
 
     }
 
-
-    // TODO: remove lieva saro koda testavimui paimta is coinflipo
-    // TODO: panaikint viliaus komentara apie lieva saro koda nes saro kodas nebuna lievas
-    // ------------------------------
     private void AddValueToInput(int value)
     {
         BetAmount += value;

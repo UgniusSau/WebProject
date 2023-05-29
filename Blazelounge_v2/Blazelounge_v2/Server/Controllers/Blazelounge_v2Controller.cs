@@ -2,15 +2,11 @@ using Blazelounge_v2.Data.Models;
 using Blazelounge_v2.Services;
 using Blazelounge_v2.Shared;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace Blazelounge_v2.Server.Controllers
 {
     [ApiController]
-    //[Route("[controller]")]
     public class Blazelounge_v2Controller : ControllerBase
     {
         private readonly IUserService _userService;
@@ -24,21 +20,29 @@ namespace Blazelounge_v2.Server.Controllers
             _configuration = configuration;
         }
 
+        //----------------------------------------------------------------------------------------//
+        //----------------------------------------- USER -----------------------------------------//
+        //----------------------------------------------------------------------------------------//
+
         [HttpGet("api/blaze-lounge-users-db")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsersDB()
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            var result = await _userService.GetUsersDB().ToListAsync();
+            var result = await _userService.GetUsers().ToListAsync();
 
-            if (!result.Any()) return NotFound();
+            if (!result.Any())
+            {
+                return NotFound();
+            }
+
             return Ok(result);
         }
 
         [HttpGet("api/blaze-lounge/user-UUID/{uuid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<User>> GetUserByUUIDDB(string uuid)
+        public async Task<ActionResult<User>> GetUserByUUID(string uuid)
         {
             var user = await _userService.GetUserByUUID(uuid);
 
@@ -53,7 +57,7 @@ namespace Blazelounge_v2.Server.Controllers
         [HttpGet("api/blaze-lounge/user-name/{name}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<User>> GetUserByNameDB(string name)
+        public async Task<ActionResult<User>> GetUserByName(string name)
         {
             var user = await _userService.GetUserByName(name);
 
@@ -68,7 +72,7 @@ namespace Blazelounge_v2.Server.Controllers
         [HttpGet("api/blaze-lounge-profile/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Profile>> GetUserProfileDB(string id)
+        public async Task<ActionResult<Profile>> GetUserProfile(string id)
         {
             var profile = await _userService.GetUserProfile(id);
 
@@ -80,31 +84,15 @@ namespace Blazelounge_v2.Server.Controllers
             return Ok(profile);
         }
 
-
-
-
         [HttpPost("api/blaze-lounge-user/register")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
 
-        public async Task<ActionResult> AddUserDB(RegisterModel registerModel)
+        public async Task<ActionResult> AddUser(RegisterModel registerModel)
         {
             try
             {
-                string password = registerModel.Password;
-                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-
-                var user = new User
-                {
-                    Username = registerModel.Username,
-                    Email = registerModel.Email,
-                    PasswordHashed = hashedPassword,
-                    Uuid = Guid.NewGuid().ToString(),
-                    FirstName = registerModel.First_Name,
-                    LastName = registerModel.Last_Name
-                };
-
-                await _userService.AddUserDB(user);
+                await _userService.AddUser(registerModel);
                 return Ok();
             }
             catch (ArgumentException ex)
@@ -115,22 +103,23 @@ namespace Blazelounge_v2.Server.Controllers
             {
                 return BadRequest($"Failed to create user: {ex.Message}");
             }
-
         }
-
 
         [HttpPost("api/blaze-lounge-user/login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<string>> AuthenticateUserDB(LoginModel loginModel)
+        public async Task<ActionResult<string>> AuthenticateUser(LoginModel loginModel)
         {
             try
             {
-                if (await _userService.AuthenticateUserDB(loginModel.Username, loginModel.Password))
+                var tokenKey = _configuration.GetSection("AppSettings:Token").Value;
+                var response = await _userService.AuthenticateUser(loginModel, tokenKey!);
+
+                if (response != null)
                 {
-                    string token = CreateToken(loginModel);
-                    return Ok(token);
+                    return Ok(response);
                 }
+
                 return BadRequest();
             }
             catch (ArgumentException ex)
@@ -141,22 +130,20 @@ namespace Blazelounge_v2.Server.Controllers
             {
                 return BadRequest($"Failed to login user: {ex.Message}");
             }
-
         }
 
         [HttpPost("api/blaze-lounge-user/change-pass")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<bool>> ChangePasswordDB(ChangePasswordModel changePasswordModel)
+        public async Task<ActionResult<bool>> ChangePassword(ChangePasswordModel changePasswordModel)
         {
             try
             {
-                string hashedNewPassword = BCrypt.Net.BCrypt.HashPassword(changePasswordModel.NewPassword);
-                changePasswordModel.NewPassword = hashedNewPassword;
-                if (await _userService.ChangePasswordDB(changePasswordModel))
+                if (await _userService.ChangePassword(changePasswordModel))
                 {
                     return Ok(true);
                 }
+
                 return BadRequest(false);
             }
             catch (ArgumentException ex)
@@ -177,14 +164,13 @@ namespace Blazelounge_v2.Server.Controllers
         {
             try
             {
-                string wholeNumber = gameModel.Amount.Split('.')[0];
+                var ammount = await _userService.ChangeBalance(gameModel, game);
 
-                if (await _userService.ChangeBalance(gameModel.Username, gameModel.Won, double.Parse(wholeNumber), game))
+                if (ammount != null)
                 {
-                    var user = await _userService.GetUserByName(gameModel.Username);
-                    var profile = await _userService.GetUserProfile(user.FkProfileidProfile.ToString());
-                    return Ok(profile.Currency.ToString());
+                    return Ok(ammount);
                 }
+
                 return BadRequest("Error occurred while changing balance");
             }
             catch (ArgumentException ex)
@@ -204,9 +190,13 @@ namespace Blazelounge_v2.Server.Controllers
         {
             try
             {
-                bool hasEnough = await _userService.CheckBalance(gameModel.Username, Double.Parse(gameModel.Amount));
+                bool hasEnough = await _userService.CheckBalance(gameModel);
+
                 if (hasEnough)
+                {
                     return Ok(true);
+                }
+
                 return BadRequest(false);
             }
             catch (ArgumentException ex)
@@ -218,6 +208,70 @@ namespace Blazelounge_v2.Server.Controllers
                 return BadRequest($"Failed to check balance: {ex.Message}");
             }
         }
+
+        [HttpGet("api/blaze-lounge-shop/get-user-items/{username}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<Item>>> GetUserItems(string username)
+        {
+            var result = await _userService.GetUserItems(username);
+
+            if (!result.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(result);
+        }
+
+        [HttpPost("api/blaze-lounge-shop/change-user-color/{item}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<bool>> ChangeUserColor(string username, Item item)
+        {
+            var result = await _userService.ChangeUserColor(username, item);
+
+            if (!result)
+            {
+                return NotFound(result);
+            }
+
+            return Ok(result);
+        }
+
+        [HttpGet("api/blaze-lounge/get-user-game-stats/{username}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<GamesStat>>> GetUserGameStats(string username)
+        {
+            var result = await _userService.GetUserGamesStats(username);
+
+            if (!result.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(result);
+        }
+
+        [HttpPost("api/blaze-lounge/update-user-game-stats")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<bool>> UpdateUserGameStats(UniversalGameModel model)
+        {
+            var result = await _userService.UpdateUserGamesStats(model);
+
+            if (!result)
+            {
+                return NotFound();
+            }
+
+            return Ok(result);
+        }
+
+        //----------------------------------------------------------------------------------------//
+        //-------------------------------------- Daily wheel -------------------------------------//
+        //----------------------------------------------------------------------------------------//
 
         [HttpGet("api/lucky-wheel/can-spin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -235,8 +289,6 @@ namespace Blazelounge_v2.Server.Controllers
             {
                 return Ok(DateTime.UtcNow - lastSpin >= TimeSpan.FromHours(24));
             }
-
-            return BadRequest("Failed to check CanSpin.");
         }
 
         [HttpGet("api/lucky-wheel/spin")]
@@ -244,93 +296,13 @@ namespace Blazelounge_v2.Server.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<int>> Spin(string userName)
         {
-            DateTime? lastSpin = await _userService.GetSpinTime(userName);
-            List<int> values = new List<int>() { 100, 200, 500, 1000 };
-
-            if (lastSpin == null)
-            {
-                await _userService.UpdateSpin(userName);
-                return Ok(values[Random.Shared.Next(values.Count)]);
-            }
-            else
-            {
-                if (DateTime.UtcNow - lastSpin >= TimeSpan.FromHours(24))
-                {
-                    await _userService.UpdateSpin(userName);
-                    return Ok(values[Random.Shared.Next(values.Count)]);
-                }
-            }
-            return Ok(0);
+            var response = await _userService.GetSpinTime(userName);
+            return response;
         }
 
-        private string CreateToken(LoginModel loginModel)
-        {
-            List<Claim> claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, loginModel.Username)
-            };
-
-            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(
-                _configuration.GetSection("AppSettings:Token").Value));
-
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-
-            var token = new JwtSecurityToken(
-                claims: claims,
-                expires: DateTime.Now.AddDays(1),
-                signingCredentials: creds);
-
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-
-            return jwt;
-        }
-
-        [HttpGet("api/blaze-lounge-shop/get-user-items/{username}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<Item>>> GetUserItems(string username)
-        {
-            var result = await _userService.GetUserItems(username);
-
-            if (!result.Any()) return NotFound();
-            return Ok(result);
-        }
-
-        [HttpPost("api/blaze-lounge-shop/change-user-color/{item}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<bool>> ChangeUserColor(string username, Item item)
-        {
-            var result = await _userService.ChangeUserColor(username, item);
-
-            if (!result) return NotFound(result);
-            return Ok(result);
-        }
-
-        [HttpGet("api/blaze-lounge/get-user-game-stats/{username}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<GamesStat>>> GetUserGameStats(string username)
-        {
-            var result = await _userService.GetUserGamesStats(username);
-            if (!result.Any()) return NotFound();
-            return Ok(result);
-        }
-
-        [HttpPost("api/blaze-lounge/update-user-game-stats")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<bool>> UpdateUserGameStats(UniversalGameModel model)
-        {
-            string wholeNumber = model.Amount.Split('.')[0];
-
-            var result = await _userService.UpdateUserGamesStats(model.Username, model.GameName, model.Won, double.Parse(wholeNumber));
-            if (!result) return NotFound();
-            return Ok(result);
-        }
-
-
+        //----------------------------------------------------------------------------------------//
         //----------------------------------------- SHOP -----------------------------------------//
+        //----------------------------------------------------------------------------------------//
 
         [HttpGet("api/blaze-lounge-shop/get-shop-items")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -339,7 +311,11 @@ namespace Blazelounge_v2.Server.Controllers
         {
             var result = await _shopService.GetShopItems().ToListAsync();
 
-            if (!result.Any()) return NotFound();
+            if (!result.Any())
+            {
+                return NotFound();
+            }
+            
             return Ok(result);
         }
 
@@ -366,7 +342,10 @@ namespace Blazelounge_v2.Server.Controllers
             try
             {
                 if (await _shopService.BuyItem(itemId, username))
+                {
                     return Ok();
+                }
+
                 return BadRequest();
             }
             catch (ArgumentException ex)

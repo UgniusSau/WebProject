@@ -13,7 +13,6 @@
             <div id="gridContainer">
                 <table>
                     <tr>
-                        @*Viena sita bloka butu galima padaryt i atskira razor componenta, bet tingiu*@
                     <td class="flip-card @(btnStateByID[1].isFlipped ? "isFlipped" : "")">
                         <div class="flip-card-inner">
                                 <button disabled="@btnStateByID[1].isDisabled" class="flip-card-front" @onclick="() => ButtonClicked(1)"></button>
@@ -536,11 +535,7 @@
                                 @*Input box kur galima irasyti bet value, mygtukai salia kurie ji keicia*@
                                 <InputText disabled="@IsBetInputDisabled" style="width:100%; background: #F5F1F210; border: 2px solid #F5F1F2; border-radius: 10px; color: #F5F1F2;" placeholder="Bet amount:" id="mineSweeperAmount" @bind-Value="@x" />
 
-                                @* ERORAI JEIGU NORESI SARAI ISIPLEMENTUOSI
-                                <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => addValueToInput(1)">+1</button>
-                                <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => addValueToInput(10)">+10</button>
-                                <button class="btn btn-number" style="flex-grow:1; min-width: 60px" @onclick="() => addValueToInput(100)">+100</button>
-                                <button class="btn btn-cancel" style="flex-grow:1; min-width: 60px" @onclick="clearValue">x</button>*@
+                               
                             </div>
                             <button id="startGameBtn" disabled="@IsPlayBtnDisabled" @onclick="onClickPlay" class="btn btn-primary">Start game</button>
                         </div>
@@ -724,8 +719,7 @@
             GameForm.Amount = newAmmount.ToString();
             Console.WriteLine($"updated wining: {GameForm.Amount}");
 
-            //ErrorMessage = string.Format("Potential winnings amount: {0}. ", 2 * double.Parse(GameForm.Amount));
-            //displayErrorMessage = true;
+
         }
     } 
 
@@ -871,7 +865,6 @@
     {
         GameForm.Won = true;
         GameForm.GameName = "Minesweeper";
-        // use same endpoint which doubles ammount so devide it
         var updateGameStats = await HttpClient.PostAsJsonAsync<UniversalGameModel>($"http://localhost:7276/api/blaze-lounge/update-user-game-stats", GameForm);
         if (!updateGameStats.IsSuccessStatusCode)
             ErrorMessage += "Error occured while updating statistics";
