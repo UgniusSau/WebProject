@@ -15,7 +15,8 @@ namespace Blazelounge_v2.Services
         Task<bool> CheckBalance(UniversalGameModel gameModel);
         Task<IQueryable<Item>> GetUserItems(string username);
         Task<bool> ChangeUserColor(string username, Item item);
-        Task<int> GetSpinTime(string username);
+        Task<int> GetSpinValue(string username);
+        Task<DateTime?> GetSpinTime(string username);
         Task<bool> UpdateSpin(string username);
         Task<IQueryable<GamesStat>> GetUserGamesStats(string username);
         Task<bool> UpdateUserGamesStats(UniversalGameModel model);

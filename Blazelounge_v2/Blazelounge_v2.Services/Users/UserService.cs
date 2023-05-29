@@ -126,7 +126,7 @@ namespace Blazelounge_v2.Services
         }
     
 
-        public async Task<int> GetSpinTime(string username)
+        public async Task<int> GetSpinValue(string username)
         {
             DateTime? lastSpin = await _UserRepository.GetSpinTime(username);
 
@@ -147,6 +147,13 @@ namespace Blazelounge_v2.Services
             }
 
             return 0;
+        }
+
+        public async Task<DateTime?> GetSpinTime(string username)
+        {
+            DateTime? lastSpin = await _UserRepository.GetSpinTime(username);
+
+            return lastSpin;
         }
 
         public async Task<bool> UpdateSpin(string username)

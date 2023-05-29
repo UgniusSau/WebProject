@@ -296,7 +296,7 @@ namespace Blazelounge_v2.Server.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<int>> Spin(string userName)
         {
-            var response = await _userService.GetSpinTime(userName);
+            var response = await _userService.GetSpinValue(userName);
             return response;
         }
 
