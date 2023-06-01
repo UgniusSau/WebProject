@@ -47,8 +47,8 @@ namespace Blazelounge_v2.Services
 
         public async Task<string?> AuthenticateUser(LoginModel loginModel, string tokenKey)
         {
-            
-            if(await _UserRepository.AuthenticateUser(loginModel.Username, loginModel.Password))
+
+            if (await _UserRepository.AuthenticateUser(loginModel.Username, loginModel.Password))
             {
                 string token = CreateToken(loginModel, tokenKey);
                 return token;
@@ -96,11 +96,11 @@ namespace Blazelounge_v2.Services
             return await _UserRepository.ChangePassword(changePasswordModel);
         }
 
-	public async Task<string?> ChangeBalance(UniversalGameModel gameModel, string? game)
-	{
+        public async Task<string?> ChangeBalance(UniversalGameModel gameModel, string? game)
+        {
             string wholeNumber = gameModel.Amount.Split('.')[0];
-            
-            if(await _UserRepository.ChangeBalance(gameModel.Username, gameModel.Won, double.Parse(wholeNumber), game))
+
+            if (await _UserRepository.ChangeBalance(gameModel.Username, gameModel.Won, double.Parse(wholeNumber), game))
             {
                 var user = await GetUserByName(gameModel.Username);
                 var profile = await GetUserProfile(user.FkProfileidProfile.ToString());
@@ -108,12 +108,12 @@ namespace Blazelounge_v2.Services
             }
 
             return null;
-	}
+        }
 
-	public async Task<bool> CheckBalance(UniversalGameModel gameModel)
-	{
-	    return await _UserRepository.CheckBalance(gameModel.Username, Double.Parse(gameModel.Amount));
-	}
+        public async Task<bool> CheckBalance(UniversalGameModel gameModel)
+        {
+            return await _UserRepository.CheckBalance(gameModel.Username, Double.Parse(gameModel.Amount));
+        }
 
         public Task<IQueryable<Item>> GetUserItems(string username)
         {
@@ -124,7 +124,7 @@ namespace Blazelounge_v2.Services
         {
             return _UserRepository.ChangeUserColor(username, item);
         }
-    
+
 
         public async Task<int> GetSpinValue(string username)
         {
