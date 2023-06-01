@@ -96,8 +96,8 @@ namespace Blazelounge_v2.Services
             return await _UserRepository.ChangePassword(changePasswordModel);
         }
 
-		public async Task<string?> ChangeBalance(UniversalGameModel gameModel, string? game)
-		{
+	public async Task<string?> ChangeBalance(UniversalGameModel gameModel, string? game)
+	{
             string wholeNumber = gameModel.Amount.Split('.')[0];
             
             if(await _UserRepository.ChangeBalance(gameModel.Username, gameModel.Won, double.Parse(wholeNumber), game))
@@ -108,12 +108,12 @@ namespace Blazelounge_v2.Services
             }
 
             return null;
-		}
+	}
 
-		public async Task<bool> CheckBalance(UniversalGameModel gameModel)
-		{
-			return await _UserRepository.CheckBalance(gameModel.Username, Double.Parse(gameModel.Amount));
-		}
+	public async Task<bool> CheckBalance(UniversalGameModel gameModel)
+	{
+	    return await _UserRepository.CheckBalance(gameModel.Username, Double.Parse(gameModel.Amount));
+	}
 
         public Task<IQueryable<Item>> GetUserItems(string username)
         {
