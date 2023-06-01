@@ -70,7 +70,7 @@ namespace Blazelounge_v2.Repositories
             return false;
         }
 
-        
+
         // profile ==========================================================================================
         public async Task<Profile> GetUserProfile(string id)
         {
@@ -92,8 +92,8 @@ namespace Blazelounge_v2.Repositories
             return false;
         }
 
-		public async Task<bool> ChangeBalance(string username, bool addBalance, double amount, string? game)
-		{
+        public async Task<bool> ChangeBalance(string username, bool addBalance, double amount, string? game)
+        {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
             if (user != null)
             {
@@ -115,7 +115,7 @@ namespace Blazelounge_v2.Repositories
             }
 
             return false;
-		}
+        }
 
         public async Task<DateTime?> GetSpinTime(string username)
         {
@@ -158,22 +158,22 @@ namespace Blazelounge_v2.Repositories
         }
 
         public async Task<bool> CheckBalance(string username, double amount)
-		{
-			var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
-			if (user != null)
-			{
-				var profile = await _context.Profiles.SingleOrDefaultAsync(p => p.IdProfile == user.FkProfileidProfile);
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            if (user != null)
+            {
+                var profile = await _context.Profiles.SingleOrDefaultAsync(p => p.IdProfile == user.FkProfileidProfile);
 
-				if (profile != null)
-				{
+                if (profile != null)
+                {
                     if (profile.Currency - amount >= 0)
                         return true;
 
-				}
-			}
+                }
+            }
 
-			return false;
-		}
+            return false;
+        }
 
         public async Task<IQueryable<Item>> GetUserItems(string username)
         {
@@ -191,9 +191,9 @@ namespace Blazelounge_v2.Repositories
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
             var profile = user != null ? await _context.Profiles.SingleOrDefaultAsync(p => p.IdProfile == user.FkProfileidProfile) : null;
 
-            if(profile != null && item != null)
+            if (profile != null && item != null)
             {
-                if(item.Type == 2)
+                if (item.Type == 2)
                 {
                     var nameColorItem = await _context.NameColors.FirstOrDefaultAsync(i => i.FkItemidItem == item.IdItem);
                     profile.BaseNameColor = nameColorItem != null ? nameColorItem.RgbValue : profile.BaseNameColor;
@@ -227,7 +227,7 @@ namespace Blazelounge_v2.Repositories
             var profile = user != null ? await _context.Profiles.SingleOrDefaultAsync(p => p.IdProfile == user.FkProfileidProfile) : null;
             var userStatistics = profile != null ? await _context.Statistics.SingleOrDefaultAsync(us => us.FkProfileidProfile == profile.IdProfile) : null;
 
-            if(userStatistics is null && profile is not null)
+            if (userStatistics is null && profile is not null)
             {
                 userStatistics = new Statistic { FkProfileidProfile = profile.IdProfile };
                 await _context.Statistics.AddAsync(userStatistics);
@@ -262,7 +262,7 @@ namespace Blazelounge_v2.Repositories
                 await _context.SaveChangesAsync();
                 return true;
             }
-            else if(stat is not null)
+            else if (stat is not null)
             {
                 stat.TimesPlayed++;
                 if (won)
